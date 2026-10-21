@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.onvexa.recorder.core.database.entity.RecordingEntity
+import com.onvexa.recorder.core.database.entity.RecordingListRow
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -65,6 +66,36 @@ interface RecordingDao {
         """
     )
     fun observeByTag(tagId: String): Flow<List<RecordingEntity>>
+
+    @Query(
+        """
+        SELECT r.id AS id, r.title AS title, r.source AS source, r.status AS status,
+               r.durationMs AS durationMs, r.startedAt AS startedAt, r.folderId AS folderId,
+               r.language AS language,
+               (SELECT s.executive FROM summaries s
+                 WHERE s.recordingId = r.id AND s.deletedAt IS NULL
+                 ORDER BY s.createdAt DESC LIMIT 1) AS summaryPreview,
+               (SELECT group_concat(t.name, '|') FROM recording_tags rt
+                  JOIN tags t ON t.id = rt.tagId
+                 WHERE rt.recordingId = r.id AND t.deletedAt IS NULL) AS tagsCsv
+        FROM recordings r
+        WHERE r.deletedAt IS NULL
+        ORDER BY r.startedAt DESC
+        """
+    )
+    fun observeLibraryRows(): Flow<List<RecordingListRow>>
+
+    @Query("UPDATE recordings SET title = :title, updatedAt = :now, syncState = 1 WHERE id = :id")
+    suspend fun rename(id: String, title: String, now: Long)
+
+    @Query("UPDATE recordings SET folderId = :folderId, updatedAt = :now, syncState = 1 WHERE id = :id")
+    suspend fun setFolder(id: String, folderId: String?, now: Long)
+
+    @Query("DELETE FROM recordings WHERE id LIKE :prefix || '%'")
+    suspend fun deleteByIdPrefix(prefix: String)
+
+    @Query("SELECT COUNT(*) FROM recordings")
+    suspend fun count(): Int
 
     @Query("SELECT * FROM recordings WHERE syncState != 0 ORDER BY updatedAt")
     suspend fun getPendingSync(): List<RecordingEntity>

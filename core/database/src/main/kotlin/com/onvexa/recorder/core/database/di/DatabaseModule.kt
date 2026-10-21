@@ -5,11 +5,14 @@ import androidx.room.Room
 import com.onvexa.recorder.core.database.AppDatabase
 import com.onvexa.recorder.core.database.dao.AttachmentDao
 import com.onvexa.recorder.core.database.dao.BookmarkDao
+import com.onvexa.recorder.core.database.dao.ChatDao
 import com.onvexa.recorder.core.database.dao.JobDao
+import com.onvexa.recorder.core.database.dao.NoteDao
 import com.onvexa.recorder.core.database.dao.OrganizationDao
 import com.onvexa.recorder.core.database.dao.RecordingDao
 import com.onvexa.recorder.core.database.dao.SummaryDao
 import com.onvexa.recorder.core.database.dao.TranscriptDao
+import com.onvexa.recorder.core.database.dao.VocabularyDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,4 +36,7 @@ object DatabaseModule {
     @Provides fun attachmentDao(db: AppDatabase): AttachmentDao = db.attachmentDao()
     @Provides fun organizationDao(db: AppDatabase): OrganizationDao = db.organizationDao()
     @Provides fun jobDao(db: AppDatabase): JobDao = db.jobDao()
+    @Provides fun noteDao(db: AppDatabase): NoteDao = db.noteDao()
+    @Provides fun chatDao(db: AppDatabase): ChatDao = db.chatDao()
+    @Provides fun vocabularyDao(db: AppDatabase): VocabularyDao = db.vocabularyDao()
 }

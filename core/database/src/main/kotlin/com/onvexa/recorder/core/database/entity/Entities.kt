@@ -324,3 +324,53 @@ data class ProcessingJobEntity(
     val createdAt: Long,
     val updatedAt: Long,
 )
+
+@Entity(
+    tableName = "notes",
+    foreignKeys = [
+        ForeignKey(RecordingEntity::class, ["id"], ["recordingId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index(value = ["recordingId", "positionMs"])],
+)
+data class NoteEntity(
+    @PrimaryKey val id: String,
+    val recordingId: String,
+    val positionMs: Long,
+    val text: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
+    val syncState: Int = SyncState.PENDING_UPSERT,
+)
+
+/** Mensajes de "Preguntar". recordingId nulo = conversación global sobre toda la biblioteca. */
+@Entity(
+    tableName = "chat_messages",
+    foreignKeys = [
+        ForeignKey(RecordingEntity::class, ["id"], ["recordingId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("recordingId"), Index("createdAt")],
+)
+data class ChatMessageEntity(
+    @PrimaryKey val id: String,
+    val recordingId: String?,
+    /** user | assistant */
+    val role: String,
+    val content: String,
+    /** JSON: [{"ms": 12000, "text": "..."}] con los momentos del audio citados. */
+    val citationsJson: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
+    val syncState: Int = SyncState.PENDING_UPSERT,
+)
+
+@Entity(tableName = "vocabulary_terms", indices = [Index(value = ["term"], unique = true)])
+data class VocabularyTermEntity(
+    @PrimaryKey val id: String,
+    val term: String,
+    val createdAt: Long,
+    val updatedAt: Long,
+    val deletedAt: Long? = null,
+    val syncState: Int = SyncState.PENDING_UPSERT,
+)

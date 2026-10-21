@@ -5,15 +5,19 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.onvexa.recorder.core.database.entity.ActionItemEntity
+import com.onvexa.recorder.core.database.entity.ActionItemRow
 import com.onvexa.recorder.core.database.entity.AttachmentEntity
 import com.onvexa.recorder.core.database.entity.BookmarkEntity
+import com.onvexa.recorder.core.database.entity.ChatMessageEntity
 import com.onvexa.recorder.core.database.entity.FolderEntity
 import com.onvexa.recorder.core.database.entity.MindMapEntity
+import com.onvexa.recorder.core.database.entity.NoteEntity
 import com.onvexa.recorder.core.database.entity.ProcessingJobEntity
 import com.onvexa.recorder.core.database.entity.RecordingTagCrossRef
 import com.onvexa.recorder.core.database.entity.SummaryEntity
 import com.onvexa.recorder.core.database.entity.TagEntity
 import com.onvexa.recorder.core.database.entity.TemplateEntity
+import com.onvexa.recorder.core.database.entity.VocabularyTermEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -50,6 +54,23 @@ interface SummaryDao {
         """
     )
     fun observeLatestSummary(recordingId: String): Flow<SummaryEntity?>
+
+    /** Todos los resúmenes de la grabación (uno por plantilla), del más reciente al más antiguo. */
+    @Query("SELECT * FROM summaries WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY createdAt DESC")
+    fun observeSummaries(recordingId: String): Flow<List<SummaryEntity>>
+
+    @Query(
+        """
+        SELECT a.id AS id, a.recordingId AS recordingId, r.title AS recordingTitle,
+               a.description AS description, a.assignee AS assignee, a.dueDate AS dueDate,
+               a.status AS status, a.sourceMs AS sourceMs
+        FROM action_items a
+        JOIN recordings r ON r.id = a.recordingId
+        WHERE a.deletedAt IS NULL AND r.deletedAt IS NULL AND a.status != 'dismissed'
+        ORDER BY a.dueDate IS NULL, a.dueDate, a.createdAt
+        """
+    )
+    fun observeActionRows(): Flow<List<ActionItemRow>>
 
     @Query("SELECT * FROM action_items WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY createdAt")
     fun observeActionItems(recordingId: String): Flow<List<ActionItemEntity>>
@@ -105,6 +126,12 @@ interface OrganizationDao {
     @Query("DELETE FROM recording_tags WHERE recordingId = :recordingId AND tagId = :tagId")
     suspend fun removeTag(recordingId: String, tagId: String)
 
+    @Query("DELETE FROM folders WHERE id LIKE :prefix || '%'")
+    suspend fun deleteFoldersByIdPrefix(prefix: String)
+
+    @Query("DELETE FROM tags WHERE id LIKE :prefix || '%'")
+    suspend fun deleteTagsByIdPrefix(prefix: String)
+
     @Query("SELECT * FROM folders WHERE deletedAt IS NULL ORDER BY name")
     fun observeFolders(): Flow<List<FolderEntity>>
 
@@ -154,4 +181,43 @@ interface JobDao {
         """
     )
     suspend fun update(id: String, status: String, attempts: Int, error: String?, runAfter: Long, now: Long)
+}
+
+@Dao
+interface NoteDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(note: NoteEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(notes: List<NoteEntity>)
+
+    @Query("SELECT * FROM notes WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY positionMs")
+    fun observeFor(recordingId: String): Flow<List<NoteEntity>>
+}
+
+@Dao
+interface ChatDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(message: ChatMessageEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(messages: List<ChatMessageEntity>)
+
+    @Query("SELECT * FROM chat_messages WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY createdAt")
+    fun observeForRecording(recordingId: String): Flow<List<ChatMessageEntity>>
+
+    @Query("SELECT * FROM chat_messages WHERE recordingId IS NULL AND deletedAt IS NULL ORDER BY createdAt")
+    fun observeGlobal(): Flow<List<ChatMessageEntity>>
+}
+
+@Dao
+interface VocabularyDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(term: VocabularyTermEntity)
+
+    @Query("SELECT * FROM vocabulary_terms WHERE deletedAt IS NULL ORDER BY term")
+    fun observeAll(): Flow<List<VocabularyTermEntity>>
+
+    @Query("UPDATE vocabulary_terms SET deletedAt = :now, updatedAt = :now, syncState = 2 WHERE id = :id")
+    suspend fun softDelete(id: String, now: Long)
 }
