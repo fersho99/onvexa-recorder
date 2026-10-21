@@ -44,4 +44,8 @@
     <string name="settings_dim_hint">Si se apaga, la pantalla queda encendida</string>
     <string name="settings_storage">Libre: %1$s</string>
     <string name="settings_version">Versión %1$s</string>
+
+    <string name="tile_label">Grabar</string>
+    <string name="complication_label">Última grabación</string>
+    <string name="tile_last">Última: %1$s</string>
 </resources>

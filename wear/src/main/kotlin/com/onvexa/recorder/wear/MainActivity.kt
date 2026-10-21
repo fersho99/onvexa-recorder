@@ -52,7 +52,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        val start = if (recorder.state.value.phase != RecorderPhase.Idle) Routes.RECORD else Routes.HOME
+        val fromTile = intent?.getBooleanExtra(EXTRA_START_RECORDING, false) == true
+        val start = if (fromTile || recorder.state.value.phase != RecorderPhase.Idle) Routes.RECORD else Routes.HOME
         setContent {
             CompositionLocalProvider(LocalAmbient provides ambient.value) {
                 OnvexaWearTheme {
@@ -60,5 +61,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        /** Lo envía el tile para empezar a grabar de inmediato. */
+        const val EXTRA_START_RECORDING = "start_recording"
     }
 }
