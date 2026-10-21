@@ -35,7 +35,7 @@ requisito de la Wearable Data Layer. En desarrollo basta con la llave debug de t
 | `:core:design` | Tokens Nebula, temas M3 y Wear, componentes base |
 | `:core:database` | Room (entidades, DAOs, búsqueda FTS4) y módulo Hilt |
 | `supabase/migrations` | Esquema SQL, RLS y Storage |
-| `docs` | Diagrama ER y paleta de colores |
+| `docs` | Diagrama ER, paleta de colores y logo de marca (`docs/brand`) |
 
 ## Ramas
 
