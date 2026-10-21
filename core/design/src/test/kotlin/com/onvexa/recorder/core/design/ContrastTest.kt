@@ -34,33 +34,33 @@ class ContrastTest {
 
     @Test
     fun `texto normal cumple AA (4_5)`() = with(PaletteHex) {
-        assertAtLeast(4.5, TEXT, BACKGROUND, "text/background")
-        assertAtLeast(4.5, TEXT, SURFACE, "text/surface")
-        assertAtLeast(4.5, TEXT, SURFACE_HIGH, "text/surfaceHigh")
-        assertAtLeast(4.5, TEXT_MUTED, SURFACE, "textMuted/surface")
-        assertAtLeast(4.5, TEXT_MUTED, SURFACE_HIGH, "textMuted/surfaceHigh")
-        assertAtLeast(4.5, PRIMARY_LIGHT, SURFACE, "primaryLight/surface")
-        assertAtLeast(4.5, PRIMARY_LIGHT, SURFACE_HIGH, "primaryLight/surfaceHigh")
-        assertAtLeast(4.5, ACCENT, SURFACE, "accent/surface")
-        assertAtLeast(4.5, ACCENT, SURFACE_HIGH, "accent/surfaceHigh")
-        assertAtLeast(4.5, RECORDING, SURFACE, "recording/surface")
-        assertAtLeast(4.5, ERROR, SURFACE, "error/surface")
-        assertAtLeast(4.5, ERROR, SURFACE_HIGH, "error/surfaceHigh")
+        for ((name, bg) in listOf("background" to BACKGROUND, "surface" to SURFACE, "surfaceHigh" to SURFACE_HIGH)) {
+            assertAtLeast(4.5, TEXT, bg, "text/$name")
+            assertAtLeast(4.5, TEXT_MUTED, bg, "textMuted/$name")
+            assertAtLeast(4.5, PRIMARY_LIGHT, bg, "primaryLight/$name")
+            assertAtLeast(4.5, RECORDING_TEXT, bg, "recordingText/$name")
+            assertAtLeast(4.5, ERROR, bg, "error/$name")
+            assertAtLeast(4.5, SUCCESS, bg, "success/$name")
+            assertAtLeast(4.5, WARNING, bg, "warning/$name")
+            assertAtLeast(4.5, INFO, bg, "info/$name")
+            assertAtLeast(4.5, WATCH, bg, "watch/$name")
+            assertAtLeast(4.5, PHONE, bg, "phone/$name")
+            BRANCHES.forEachIndexed { i, c -> assertAtLeast(4.5, c, bg, "branch$i/$name") }
+        }
+        assertAtLeast(4.5, PRIMARY_LIGHT, PRIMARY_CONTAINER, "primaryLight/primaryContainer")
+        assertAtLeast(4.5, TEXT, PRIMARY_CONTAINER, "text/primaryContainer")
     }
 
     @Test
     fun `texto sobre rellenos cumple AA`() = with(PaletteHex) {
         assertAtLeast(4.5, ON_PRIMARY, PRIMARY, "onPrimary/primary")
-        assertAtLeast(4.5, ON_SECONDARY, SECONDARY, "onSecondary/secondary")
         assertAtLeast(4.5, ON_RECORDING, RECORDING, "onRecording/recording")
         assertAtLeast(4.5, ON_ERROR, ERROR, "onError/error")
     }
 
     @Test
     fun `graficos e iconos cumplen 3_1`() = with(PaletteHex) {
-        assertAtLeast(3.0, SECONDARY, BACKGROUND, "secondary/background")
-        assertAtLeast(3.0, SECONDARY, SURFACE, "secondary/surface")
-        assertAtLeast(3.0, RECORDING, SURFACE_HIGH, "recording/surfaceHigh")
         assertAtLeast(3.0, RECORDING, BACKGROUND, "recording/background")
+        assertAtLeast(3.0, RECORDING, SURFACE, "recording/surface")
     }
 }

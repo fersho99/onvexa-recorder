@@ -61,7 +61,7 @@ private fun Bubble(message: ChatMessageView, onCitation: ((Long) -> Unit)?) {
     ) {
         Surface(
             modifier = Modifier.widthIn(max = 320.dp),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             color = if (message.isUser) OnvexaPalette.Primary else OnvexaPalette.Surface,
             border = if (message.isUser) null else BorderStroke(1.dp, OnvexaPalette.Outline),
         ) {
@@ -78,13 +78,13 @@ private fun Bubble(message: ChatMessageView, onCitation: ((Long) -> Unit)?) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 message.citations.forEach { citation ->
-                    val chipShape = RoundedCornerShape(50)
+                    val chipShape = RoundedCornerShape(8.dp)
                     Surface(
                         modifier = Modifier.clip(chipShape).clickable(enabled = onCitation != null) {
                             onCitation?.invoke(citation.ms)
                         },
                         shape = chipShape,
-                        color = OnvexaPalette.SurfaceHigh,
+                        color = OnvexaPalette.PrimaryContainer,
                     ) {
                         Text(
                             text = "▶ " + formatClock(citation.ms),
@@ -111,7 +111,7 @@ fun DisabledChatInput(modifier: Modifier = Modifier) {
             onValueChange = {},
             enabled = false,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             placeholder = { Text(stringResource(R.string.ask_input_hint)) },
             colors = OutlinedTextFieldDefaults.colors(
                 disabledBorderColor = OnvexaPalette.Outline,

@@ -93,7 +93,7 @@ fun TasksScreen(onOpenRecording: (String) -> Unit, viewModel: TasksViewModel = h
 @Composable
 private fun TaskRow(row: ActionItemRow, onToggle: (Boolean) -> Unit, onOpen: () -> Unit) {
     val done = row.status == "done"
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(12.dp)
     Surface(
         modifier = Modifier.fillMaxWidth().clip(shape).clickable(onClick = onOpen),
         shape = shape,
@@ -127,7 +127,7 @@ private fun TaskRow(row: ActionItemRow, onToggle: (Boolean) -> Unit, onOpen: () 
                 Text(
                     text = displayTitle(row.recordingTitle),
                     style = MaterialTheme.typography.labelSmall,
-                    color = OnvexaPalette.PrimaryLight,
+                    color = OnvexaPalette.TextMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

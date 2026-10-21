@@ -10,13 +10,13 @@ import com.onvexa.recorder.core.design.OnvexaType
 private val WearColors = Colors(
     primary = P.Primary,
     primaryVariant = P.PrimaryLight,
-    secondary = P.Recording,
-    secondaryVariant = P.Accent,
+    secondary = P.RecordingText,
+    secondaryVariant = P.Recording,
     background = P.Background,
     surface = P.Surface,
     error = P.Error,
     onPrimary = P.OnPrimary,
-    onSecondary = P.OnRecording,
+    onSecondary = P.Background,
     onBackground = P.Text,
     onSurface = P.Text,
     onSurfaceVariant = P.TextMuted,
@@ -25,12 +25,12 @@ private val WearColors = Colors(
 
 private val WearTypography = Typography(
     display1 = OnvexaType.Timer,
-    title1 = OnvexaType.Title,
+    title1 = OnvexaType.TitleLarge,
     title2 = OnvexaType.Subtitle,
     body1 = OnvexaType.Body,
     body2 = OnvexaType.Caption,
     caption1 = OnvexaType.Caption,
-    caption2 = OnvexaType.Label,
+    caption2 = OnvexaType.LabelSmall,
     button = OnvexaType.Label,
 )
 

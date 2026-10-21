@@ -19,8 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onvexa.recorder.app.R
+import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.app.ui.detail.TextDialog
 import com.onvexa.recorder.core.design.OnvexaPalette
 import com.onvexa.recorder.core.design.OnvexaType
@@ -65,7 +64,7 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(8.dp),
             color = OnvexaPalette.SurfaceHigh,
         ) {
             Text(
@@ -90,7 +89,7 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
                     },
                 ),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (state.started && !state.paused) OnvexaPalette.Recording else OnvexaPalette.TextMuted,
+                color = if (state.started && !state.paused) OnvexaPalette.RecordingText else OnvexaPalette.TextMuted,
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -117,15 +116,10 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(templates, key = { it.id }) { template ->
-                FilterChip(
+                OnvexaChip(
                     selected = (state.templateId ?: templates.firstOrNull()?.id) == template.id,
                     onClick = { viewModel.selectTemplate(template.id) },
-                    label = { Text(if (english) template.nameEn else template.nameEs) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        labelColor = OnvexaPalette.TextMuted,
-                        selectedContainerColor = OnvexaPalette.SurfaceHigh,
-                        selectedLabelColor = OnvexaPalette.PrimaryLight,
-                    ),
+                    label = if (english) template.nameEn else template.nameEs,
                 )
             }
         }
@@ -138,10 +132,10 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
         ) {
             if (state.started) {
                 IconButton(onClick = viewModel::highlight) {
-                    Icon(Icons.Default.Bookmark, stringResource(R.string.record_highlight), tint = OnvexaPalette.PrimaryLight)
+                    Icon(Icons.Default.Bookmark, stringResource(R.string.record_highlight), tint = OnvexaPalette.Text)
                 }
                 IconButton(onClick = { noting = true }) {
-                    Icon(Icons.AutoMirrored.Filled.NoteAdd, stringResource(R.string.record_note), tint = OnvexaPalette.PrimaryLight)
+                    Icon(Icons.AutoMirrored.Filled.NoteAdd, stringResource(R.string.record_note), tint = OnvexaPalette.Text)
                 }
                 RecordButton(
                     kind = if (state.paused) RecordButtonKind.Resume else RecordButtonKind.Pause,

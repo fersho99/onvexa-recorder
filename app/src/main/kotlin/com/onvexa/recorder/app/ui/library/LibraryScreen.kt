@@ -20,8 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onvexa.recorder.app.R
 import com.onvexa.recorder.app.ui.common.EmptyState
+import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.app.ui.common.SourceBadge
 import com.onvexa.recorder.app.ui.common.StatusPill
 import com.onvexa.recorder.app.ui.common.TagChip
@@ -136,7 +135,7 @@ private fun SearchField(value: String, onChange: (String) -> Unit, onClear: () -
         onValueChange = onChange,
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         placeholder = { Text(stringResource(R.string.library_search_hint), color = OnvexaPalette.TextMuted) },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = OnvexaPalette.TextMuted) },
         trailingIcon = {
@@ -170,22 +169,18 @@ private fun FolderRow(state: LibraryUiState, viewModel: LibraryViewModel) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
-            FilterChip(
+            OnvexaChip(
                 selected = state.filter.folderId == null,
                 onClick = { viewModel.selectFolder(null) },
-                label = { Text(stringResource(R.string.filter_all_folders)) },
-                colors = chipColors(),
+                label = stringResource(R.string.filter_all_folders),
             )
         }
         items(state.folders, key = { it.id }) { folder ->
-            FilterChip(
+            OnvexaChip(
                 selected = state.filter.folderId == folder.id,
                 onClick = { viewModel.selectFolder(folder.id) },
-                label = { Text(folder.name) },
-                leadingIcon = {
-                    Icon(Icons.Default.Folder, contentDescription = null, modifier = Modifier.width(18.dp))
-                },
-                colors = chipColors(),
+                label = folder.name,
+                leadingIcon = Icons.Default.Folder,
             )
         }
     }
@@ -198,66 +193,29 @@ private fun FilterRow(state: LibraryUiState, viewModel: LibraryViewModel) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
-            FilterChip(
-                selected = state.filter.source == Source.WATCH,
-                onClick = { viewModel.toggleSource(Source.WATCH) },
-                label = { Text(stringResource(R.string.filter_watch)) },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.filter.source == Source.WATCH, { viewModel.toggleSource(Source.WATCH) }, stringResource(R.string.filter_watch))
         }
         item {
-            FilterChip(
-                selected = state.filter.source == Source.PHONE,
-                onClick = { viewModel.toggleSource(Source.PHONE) },
-                label = { Text(stringResource(R.string.filter_phone)) },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.filter.source == Source.PHONE, { viewModel.toggleSource(Source.PHONE) }, stringResource(R.string.filter_phone))
         }
         item {
-            FilterChip(
-                selected = state.datePreset == DatePreset.TODAY,
-                onClick = { viewModel.togglePreset(DatePreset.TODAY) },
-                label = { Text(stringResource(R.string.filter_today)) },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.datePreset == DatePreset.TODAY, { viewModel.togglePreset(DatePreset.TODAY) }, stringResource(R.string.filter_today))
         }
         item {
-            FilterChip(
-                selected = state.datePreset == DatePreset.WEEK,
-                onClick = { viewModel.togglePreset(DatePreset.WEEK) },
-                label = { Text(stringResource(R.string.filter_week)) },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.datePreset == DatePreset.WEEK, { viewModel.togglePreset(DatePreset.WEEK) }, stringResource(R.string.filter_week))
         }
         item {
-            FilterChip(
-                selected = state.datePreset == DatePreset.MONTH,
-                onClick = { viewModel.togglePreset(DatePreset.MONTH) },
-                label = { Text(stringResource(R.string.filter_month)) },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.datePreset == DatePreset.MONTH, { viewModel.togglePreset(DatePreset.MONTH) }, stringResource(R.string.filter_month))
         }
         items(state.tags, key = { "tag-$it" }) { tag ->
-            FilterChip(
-                selected = state.filter.tag == tag,
-                onClick = { viewModel.toggleTag(tag) },
-                label = { Text("#$tag") },
-                colors = chipColors(),
-            )
+            OnvexaChip(state.filter.tag == tag, { viewModel.toggleTag(tag) }, "#$tag")
         }
     }
 }
 
 @Composable
-private fun chipColors() = FilterChipDefaults.filterChipColors(
-    labelColor = OnvexaPalette.TextMuted,
-    selectedContainerColor = OnvexaPalette.SurfaceHigh,
-    selectedLabelColor = OnvexaPalette.PrimaryLight,
-)
-
-@Composable
 private fun RecordingCard(item: LibraryItem, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(12.dp)
     Surface(
         modifier = Modifier.fillMaxWidth().clip(shape).clickable(onClick = onClick),
         shape = shape,

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -37,31 +36,33 @@ import com.onvexa.recorder.core.model.States
 
 @Composable
 fun SourceBadge(source: Source, modifier: Modifier = Modifier) {
-    val icon = if (source == Source.WATCH) Icons.Default.Watch else Icons.Default.PhoneAndroid
-    val description = if (source == Source.WATCH) R.string.source_watch else R.string.source_phone
+    val watch = source == Source.WATCH
+    val icon = if (watch) Icons.Default.Watch else Icons.Default.PhoneAndroid
+    val description = if (watch) R.string.source_watch else R.string.source_phone
+    val tint = if (watch) OnvexaPalette.Watch else OnvexaPalette.Phone
     Box(
         modifier = modifier
-            .size(40.dp)
-            .background(OnvexaPalette.SurfaceHigh, CircleShape),
+            .size(32.dp)
+            .background(tint.copy(alpha = 0.14f), RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = stringResource(description),
-            tint = OnvexaPalette.PrimaryLight,
-            modifier = Modifier.size(22.dp),
+            tint = tint,
+            modifier = Modifier.size(18.dp),
         )
     }
 }
 
 @Composable
 fun TagChip(text: String, modifier: Modifier = Modifier) {
-    Surface(modifier = modifier, shape = RoundedCornerShape(50), color = OnvexaPalette.SurfaceHigh) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(6.dp), color = OnvexaPalette.SurfaceHigh) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = OnvexaPalette.PrimaryLight,
+            color = OnvexaPalette.TextMuted,
             maxLines = 1,
         )
     }
@@ -92,14 +93,14 @@ fun StatusPill(status: String, modifier: Modifier = Modifier) {
             CircularProgressIndicator(
                 modifier = Modifier.size(12.dp),
                 strokeWidth = 2.dp,
-                color = OnvexaPalette.PrimaryLight,
+                color = OnvexaPalette.Info,
             )
         }
         Spacer(Modifier.width(6.dp))
         Text(
             text = statusLabel(status),
             style = MaterialTheme.typography.labelSmall,
-            color = if (failed) OnvexaPalette.Error else OnvexaPalette.PrimaryLight,
+            color = if (failed) OnvexaPalette.Error else OnvexaPalette.Info,
         )
     }
 }
@@ -112,7 +113,7 @@ fun SectionCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         color = OnvexaPalette.Surface,
         border = BorderStroke(1.dp, OnvexaPalette.Outline),
     ) {
@@ -120,7 +121,7 @@ fun SectionCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = OnvexaPalette.PrimaryLight,
+                color = OnvexaPalette.Text,
             )
             content()
         }
@@ -132,7 +133,7 @@ fun BulletList(items: List<String>, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         items.forEach { item ->
             Row {
-                Text("•", color = OnvexaPalette.PrimaryLight, style = MaterialTheme.typography.bodyMedium)
+                Text("•", color = OnvexaPalette.TextMuted, style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.width(8.dp))
                 Text(item, color = OnvexaPalette.Text, style = MaterialTheme.typography.bodyMedium)
             }
@@ -148,7 +149,7 @@ fun SimpleRichText(text: String, modifier: Modifier = Modifier) {
             when {
                 line.isBlank() -> Spacer(Modifier.size(2.dp))
                 line.startsWith("- ") -> Row {
-                    Text("•", color = OnvexaPalette.PrimaryLight, style = MaterialTheme.typography.bodyMedium)
+                    Text("•", color = OnvexaPalette.TextMuted, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.width(8.dp))
                     Text(line.removePrefix("- "), color = OnvexaPalette.Text, style = MaterialTheme.typography.bodyMedium)
                 }
@@ -170,7 +171,7 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Icon(icon, contentDescription = null, tint = OnvexaPalette.PrimaryLight, modifier = Modifier.size(40.dp))
+        Icon(icon, contentDescription = null, tint = OnvexaPalette.TextMuted, modifier = Modifier.size(32.dp))
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,

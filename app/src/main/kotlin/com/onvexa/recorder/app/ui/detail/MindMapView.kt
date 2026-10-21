@@ -86,7 +86,7 @@ fun MindMapView(root: MindNode, modifier: Modifier = Modifier) {
             scale(scale, scale, pivot = Offset.Zero)
         }) {
             val branches = OnvexaPalette.MindMapBranches
-            fun colorOf(branch: Int) = if (branch < 0) OnvexaPalette.Primary else branches[branch % branches.size]
+            fun colorOf(branch: Int) = if (branch < 0) OnvexaPalette.PrimaryLight else branches[branch % branches.size]
 
             // Conexiones primero, para que los nodos queden encima.
             layout.nodes.forEach { node ->
@@ -105,7 +105,7 @@ fun MindMapView(root: MindNode, modifier: Modifier = Modifier) {
                 val color = colorOf(node.branch)
                 val isRoot = node.depth == 0
                 drawRoundRect(
-                    color = if (isRoot) color else color.copy(alpha = 0.22f),
+                    color = if (isRoot) OnvexaPalette.Primary else color.copy(alpha = 0.16f),
                     topLeft = Offset(node.x, node.y),
                     size = Size(node.width, node.height),
                     cornerRadius = CornerRadius(node.height / 2f),
@@ -116,7 +116,7 @@ fun MindMapView(root: MindNode, modifier: Modifier = Modifier) {
                         topLeft = Offset(node.x, node.y),
                         size = Size(node.width, node.height),
                         cornerRadius = CornerRadius(node.height / 2f),
-                        style = Stroke(width = 1.5f * density),
+                        style = Stroke(width = 1f * density),
                     )
                 }
                 val text = measurer.measure(

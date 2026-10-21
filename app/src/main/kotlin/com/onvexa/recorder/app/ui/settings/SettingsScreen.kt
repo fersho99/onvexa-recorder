@@ -14,8 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -35,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onvexa.recorder.app.R
+import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.core.design.OnvexaPalette
 import java.util.Locale
 
@@ -45,12 +44,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     var showLegal by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val english = Locale.getDefault().language == "en"
-    val chipColors = FilterChipDefaults.filterChipColors(
-        labelColor = OnvexaPalette.TextMuted,
-        selectedContainerColor = OnvexaPalette.SurfaceHigh,
-        selectedLabelColor = OnvexaPalette.PrimaryLight,
-    )
-
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -84,11 +77,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     "es" to R.string.language_es,
                     "en" to R.string.language_en,
                 ).forEach { (code, label) ->
-                    FilterChip(
+                    OnvexaChip(
                         selected = settings.language == code,
                         onClick = { viewModel.setLanguage(code) },
-                        label = { Text(stringResource(label)) },
-                        colors = chipColors,
+                        label = stringResource(label),
                     )
                 }
             }
@@ -104,11 +96,10 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         Section(stringResource(R.string.settings_template)) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(templates, key = { it.id }) { template ->
-                    FilterChip(
+                    OnvexaChip(
                         selected = (settings.defaultTemplateId ?: templates.firstOrNull()?.id) == template.id,
                         onClick = { viewModel.setDefaultTemplate(template.id) },
-                        label = { Text(if (english) template.nameEn else template.nameEs) },
-                        colors = chipColors,
+                        label = if (english) template.nameEn else template.nameEs,
                     )
                 }
             }
@@ -187,12 +178,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
 private fun Section(title: String, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         color = OnvexaPalette.Surface,
         border = BorderStroke(1.dp, OnvexaPalette.Outline),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = OnvexaPalette.PrimaryLight)
+            Text(title, style = MaterialTheme.typography.titleMedium, color = OnvexaPalette.Text)
             content()
         }
     }

@@ -40,8 +40,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -79,6 +80,7 @@ import com.onvexa.recorder.app.ui.common.BulletList
 import com.onvexa.recorder.app.ui.common.ChatMessages
 import com.onvexa.recorder.app.ui.common.DisabledChatInput
 import com.onvexa.recorder.app.ui.common.EmptyState
+import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.app.ui.common.SectionCard
 import com.onvexa.recorder.app.ui.common.SimpleRichText
 import com.onvexa.recorder.app.ui.common.SourceBadge
@@ -151,7 +153,14 @@ private fun ColumnScope.DetailContent(
         containerColor = OnvexaPalette.Background,
         contentColor = OnvexaPalette.PrimaryLight,
         edgePadding = 8.dp,
-        divider = {},
+        indicator = { positions ->
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(positions[tab]),
+                height = 2.dp,
+                color = OnvexaPalette.PrimaryLight,
+            )
+        },
+        divider = { HorizontalDivider(color = OnvexaPalette.Outline) },
     ) {
         tabTitles.forEachIndexed { index, title ->
             Tab(
@@ -274,7 +283,7 @@ private fun MetaRow(detail: RecordingDetail) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        SourceBadge(source, Modifier.size(28.dp))
+        SourceBadge(source)
         Text(
             text = formatDateTime(detail.recording.startedAt),
             style = MaterialTheme.typography.bodySmall,
@@ -289,22 +298,22 @@ private fun MetaRow(detail: RecordingDetail) {
 private fun PlayerBar(detail: RecordingDetail, playback: PlaybackState, viewModel: DetailViewModel) {
     val duration = playback.durationMs.coerceAtLeast(1L)
     val marks = remember(detail.bookmarks, detail.attachments, detail.notes) {
-        (detail.bookmarks.map { it.positionMs } +
-            detail.attachments.map { it.positionMs } +
-            detail.notes.map { it.positionMs })
+        detail.bookmarks.map { it.positionMs to OnvexaPalette.Warning } +
+            detail.attachments.map { it.positionMs to OnvexaPalette.Info } +
+            detail.notes.map { it.positionMs to OnvexaPalette.Success }
     }
     Surface(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(12.dp),
         color = OnvexaPalette.Surface,
         border = BorderStroke(1.dp, OnvexaPalette.Outline),
     ) {
         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Box(Modifier.fillMaxWidth()) {
                 Canvas(Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 10.dp)) {
-                    marks.forEach { ms ->
+                    marks.forEach { (ms, color) ->
                         val x = size.width * (ms.toFloat() / duration).coerceIn(0f, 1f)
-                        drawCircle(OnvexaPalette.Accent, radius = 3.dp.toPx(), center = Offset(x, size.height / 2f))
+                        drawCircle(color, radius = 3.dp.toPx(), center = Offset(x, size.height / 2f))
                     }
                 }
                 Slider(
@@ -340,7 +349,7 @@ private fun PlayerBar(detail: RecordingDetail, playback: PlaybackState, viewMode
                 }
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(OnvexaPalette.Primary, CircleShape)
                         .clickable(onClick = viewModel::togglePlay),
@@ -389,15 +398,10 @@ private fun SummaryTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
             item {
                 androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     itemsIndexed(summaries) { index, s ->
-                        FilterChip(
+                        OnvexaChip(
                             selected = index == selected,
                             onClick = { selected = index },
-                            label = { Text(s.templateName ?: stringResource(R.string.summary_default_name)) },
-                            colors = FilterChipDefaults.filterChipColors(
-                                labelColor = OnvexaPalette.TextMuted,
-                                selectedContainerColor = OnvexaPalette.SurfaceHigh,
-                                selectedLabelColor = OnvexaPalette.PrimaryLight,
-                            ),
+                            label = s.templateName ?: stringResource(R.string.summary_default_name),
                         )
                     }
                 }
@@ -487,7 +491,7 @@ private fun TranscriptTab(detail: RecordingDetail, positionMs: Long, viewModel: 
                 onValueChange = { query = it },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(12.dp),
                 placeholder = { Text(stringResource(R.string.transcript_search_hint), color = OnvexaPalette.TextMuted) },
                 leadingIcon = { Icon(Icons.Default.Search, null, tint = OnvexaPalette.TextMuted) },
                 trailingIcon = {
@@ -512,7 +516,7 @@ private fun TranscriptTab(detail: RecordingDetail, positionMs: Long, viewModel: 
                 OnvexaPalette.MindMapBranches[speakerOrder.indexOf(it.id).coerceAtLeast(0) % OnvexaPalette.MindMapBranches.size]
             } ?: OnvexaPalette.PrimaryLight
             val isActive = index == active
-            val shape = RoundedCornerShape(14.dp)
+            val shape = RoundedCornerShape(12.dp)
             Surface(
                 modifier = Modifier.fillMaxWidth().clip(shape).clickable { viewModel.seekTo(segment.startMs) },
                 shape = shape,
@@ -592,7 +596,7 @@ private fun TasksTab(detail: RecordingDetail, viewModel: DetailViewModel) {
             val done = item.status == "done"
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(12.dp),
                 color = OnvexaPalette.Surface,
                 border = BorderStroke(1.dp, OnvexaPalette.Outline),
             ) {
@@ -645,7 +649,7 @@ private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         items(detail.attachments, key = { it.id }) { attachment ->
-            val shape = RoundedCornerShape(14.dp)
+            val shape = RoundedCornerShape(12.dp)
             Surface(
                 modifier = Modifier.fillMaxWidth().clip(shape).clickable { onSeek(attachment.positionMs) },
                 shape = shape,
@@ -657,7 +661,7 @@ private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
                         modifier = Modifier.size(72.dp).background(OnvexaPalette.SurfaceHigh, RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Default.Image, null, tint = OnvexaPalette.PrimaryLight)
+                        Icon(Icons.Default.Image, null, tint = OnvexaPalette.TextMuted)
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(

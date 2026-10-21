@@ -1,5 +1,6 @@
 package com.onvexa.recorder.app.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -16,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -108,11 +111,13 @@ private fun BottomBar(
     val colors = NavigationBarItemDefaults.colors(
         selectedIconColor = OnvexaPalette.PrimaryLight,
         selectedTextColor = OnvexaPalette.PrimaryLight,
-        indicatorColor = OnvexaPalette.SurfaceHigh,
+        indicatorColor = Color.Transparent,
         unselectedIconColor = OnvexaPalette.TextMuted,
         unselectedTextColor = OnvexaPalette.TextMuted,
     )
-    NavigationBar(containerColor = OnvexaPalette.Surface, contentColor = OnvexaPalette.Text) {
+    Column {
+    HorizontalDivider(color = OnvexaPalette.Outline)
+    NavigationBar(containerColor = OnvexaPalette.Surface, contentColor = OnvexaPalette.Text, tonalElevation = 0.dp) {
         NavigationBarItem(
             selected = currentRoute == Routes.LIBRARY,
             onClick = { onSelect(Routes.LIBRARY) },
@@ -135,7 +140,7 @@ private fun BottomBar(
                     kind = RecordButtonKind.Record,
                     description = stringResource(R.string.nav_record),
                     onClick = onRecord,
-                    size = 48.dp,
+                    size = 44.dp,
                 )
             },
             colors = colors,
@@ -154,5 +159,6 @@ private fun BottomBar(
             label = { Text(stringResource(R.string.nav_settings)) },
             colors = colors,
         )
+    }
     }
 }
