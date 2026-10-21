@@ -1,6 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Onvexa Recorder</string>
-    <string name="timer_zero">00:00</string>
-    <string name="cd_record">Iniciar grabación</string>
+    <string name="untitled">Sin título</string>
+
+    <string name="home_connected">Celular conectado</string>
+    <string name="home_disconnected">Sin conexión</string>
+    <string name="home_battery_low">Batería baja</string>
+    <string name="home_record">Grabar</string>
+    <string name="home_recordings">Grabaciones</string>
+    <string name="home_settings">Ajustes</string>
+
+    <string name="record_recording">GRABANDO</string>
+    <string name="record_paused">EN PAUSA</string>
+    <string name="record_highlight_toast">Resaltado %1$d · %2$s</string>
+    <string name="record_highlight">Resaltar</string>
+    <string name="record_pause">Pausar</string>
+    <string name="record_resume">Reanudar</string>
+    <string name="record_stop">Detener</string>
+    <string name="ambient_minutes">%1$d min</string>
+
+    <string name="confirm_title">¿Salir de la grabación?</string>
+    <string name="confirm_stop">Detener y guardar</string>
+    <string name="confirm_continue">Seguir</string>
+
+    <string name="saved_title">Guardada</string>
+    <string name="saved_pending">Pendiente de sincronizar</string>
+
+    <string name="list_title">Grabaciones</string>
+    <string name="list_empty">Aún no hay grabaciones</string>
+
+    <string name="detail_not_found">No se encontró la grabación</string>
+    <string name="detail_pending_sync">Pendiente de sincronizar</string>
+    <string name="detail_summary">Resumen</string>
+    <string name="detail_actions">Tareas</string>
+    <string name="detail_failed">No se pudo procesar</string>
+    <string name="detail_waiting_sync">Se resumirá al sincronizar con el celular</string>
+    <string name="detail_processing">Procesando…</string>
+    <string name="detail_no_summary">Sin resumen</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_haptics">Vibración</string>
+    <string name="settings_dim">Atenuar al grabar</string>
+    <string name="settings_dim_hint">Si se apaga, la pantalla queda encendida</string>
+    <string name="settings_storage">Libre: %1$s</string>
+    <string name="settings_version">Versión %1$s</string>
 </resources>
