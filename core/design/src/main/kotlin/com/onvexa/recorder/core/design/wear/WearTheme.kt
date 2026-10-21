@@ -1,6 +1,7 @@
 package com.onvexa.recorder.core.design.wear
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.Colors
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Typography
@@ -12,7 +13,8 @@ private val WearColors = Colors(
     primaryVariant = P.PrimaryLight,
     secondary = P.RecordingText,
     secondaryVariant = P.Recording,
-    background = P.Background,
+    // Negro puro: en pantallas OLED los píxeles apagados no consumen batería.
+    background = Color.Black,
     surface = P.Surface,
     error = P.Error,
     onPrimary = P.OnPrimary,

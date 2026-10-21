@@ -39,6 +39,7 @@ data class LibraryItem(
     val tags: List<String>,
     val folderId: String?,
     val language: String?,
+    val pendingSync: Boolean = false,
 ) {
     val isProcessing: Boolean get() = status in States.processing
     val isFailed: Boolean get() = status == States.FAILED

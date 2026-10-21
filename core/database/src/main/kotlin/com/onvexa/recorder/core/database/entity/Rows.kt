@@ -13,6 +13,8 @@ data class RecordingListRow(
     val summaryPreview: String?,
     /** Nombres de etiquetas separados por "|". */
     val tagsCsv: String?,
+    /** 0 = sincronizada; otra cosa = tiene cambios pendientes de subir. */
+    val syncState: Int,
 )
 
 /** Punto de acción con el título de su grabación, para la pantalla global de tareas. */

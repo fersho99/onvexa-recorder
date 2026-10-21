@@ -71,7 +71,7 @@ interface RecordingDao {
         """
         SELECT r.id AS id, r.title AS title, r.source AS source, r.status AS status,
                r.durationMs AS durationMs, r.startedAt AS startedAt, r.folderId AS folderId,
-               r.language AS language,
+               r.language AS language, r.syncState AS syncState,
                (SELECT s.executive FROM summaries s
                  WHERE s.recordingId = r.id AND s.deletedAt IS NULL
                  ORDER BY s.createdAt DESC LIMIT 1) AS summaryPreview,

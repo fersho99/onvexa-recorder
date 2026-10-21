@@ -17,15 +17,14 @@ import com.onvexa.recorder.core.database.entity.ChatMessageEntity
 import com.onvexa.recorder.core.database.entity.FolderEntity
 import com.onvexa.recorder.core.database.entity.NoteEntity
 import com.onvexa.recorder.core.database.entity.RecordingEntity
-import com.onvexa.recorder.core.database.entity.RecordingListRow
 import com.onvexa.recorder.core.database.entity.SpeakerEntity
 import com.onvexa.recorder.core.database.entity.SummaryEntity
 import com.onvexa.recorder.core.database.entity.TagEntity
 import com.onvexa.recorder.core.database.entity.TemplateEntity
 import com.onvexa.recorder.core.database.entity.TranscriptSegmentEntity
+import com.onvexa.recorder.core.database.entity.toLibraryItem
 import com.onvexa.recorder.core.model.LibraryItem
 import com.onvexa.recorder.core.model.MindNode
-import com.onvexa.recorder.core.model.Source
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,7 +49,7 @@ class RecordingsRepository @Inject constructor(
     private fun now() = System.currentTimeMillis()
 
     fun libraryItems(): Flow<List<LibraryItem>> =
-        recordingDao.observeLibraryRows().map { rows -> rows.map { it.toItem() } }
+        recordingDao.observeLibraryRows().map { rows -> rows.map { it.toLibraryItem() } }
 
     fun folders(): Flow<List<FolderEntity>> = organizationDao.observeFolders()
     fun tags(): Flow<List<TagEntity>> = organizationDao.observeTags()
@@ -133,19 +132,6 @@ class RecordingsRepository @Inject constructor(
         val notes: List<NoteEntity>,
     )
 }
-
-private fun RecordingListRow.toItem() = LibraryItem(
-    id = id,
-    title = title.orEmpty(),
-    source = Source.fromKey(source),
-    status = status,
-    durationMs = durationMs,
-    startedAt = startedAt,
-    summaryPreview = summaryPreview,
-    tags = tagsCsv?.split('|')?.filter { it.isNotBlank() }.orEmpty(),
-    folderId = folderId,
-    language = language,
-)
 
 private fun SummaryEntity.toView(templateName: String?) = SummaryView(
     id = id,
