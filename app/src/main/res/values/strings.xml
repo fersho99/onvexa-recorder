@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Onvexa Recorder</string>
+    <string name="home_title">Onvexa Recorder</string>
+    <string name="home_subtitle">Base del proyecto lista</string>
+    <string name="cd_record">Iniciar grabación</string>
+</resources>

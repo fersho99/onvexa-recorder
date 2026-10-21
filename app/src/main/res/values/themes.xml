@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="onvexa_background">#120A2E</color>
+
+    <style name="Theme.Onvexa" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/onvexa_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

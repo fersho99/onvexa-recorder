@@ -16,15 +16,15 @@ dependencyResolutionManagement {
 
 rootProject.name = "onvexa_recorder"
 
-// Fase 0: capa de datos y sistema de diseño.
+// Fase 0: base del proyecto (datos, diseño y esqueletos de las apps).
 include(":core:database")
 include(":core:design")
+include(":app")
+include(":wear")
 
-// Se activan conforme se implementan (Fase 0 diseño, Fase 1 MVP):
+// Se activan conforme se implementan (Fase 1 MVP):
 // include(":core:model")
 // include(":core:common")
 // include(":core:audio")
 // include(":core:sync")
 // include(":core:ai")
-// include(":app")
-// include(":wear")
