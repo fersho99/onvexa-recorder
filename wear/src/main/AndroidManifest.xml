@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
 
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="false" />
+
         <!-- Funciona sin la app del celular instalada (grabación autónoma). -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
