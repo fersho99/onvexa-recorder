@@ -1,36 +1,41 @@
-# Paleta onvexa_recorder (propuesta)
+# Paleta onvexa_recorder — Nebula
 
-Base de marca Onvexa: navy `#1B2A3D` y teal `#0F6B5C` (monograma O+N).
-El resto se deriva de esos dos para el estilo oscuro tipo HUD. Contraste calculado con WCAG 2.x.
+Colores de marca (Onvexa Nebula): `#1A0F3D` índigo profundo, `#6A11F2` púrpura vibrante,
+`#8B5CF6` violeta nebula, `#EC4899` rosa energético, `#E9D5FF` lavanda suave.
+Los marcados como "derivado" se calcularon a partir de ellos para el modo oscuro tipo HUD.
+Contraste según WCAG 2.x.
 
-| Token | Hex | Uso |
-|---|---|---|
-| `background` | `#0B121B` | Fondo (navy muy oscuro) |
-| `surface` | `#1B2A3D` | Tarjetas (navy de marca) |
-| `surfaceHigh` | `#243649` | Tarjetas elevadas, hojas, diálogos |
-| `primary` | `#0F6B5C` | Rellenos y bordes (teal de marca) |
-| `onPrimary` | `#FFFFFF` | Texto sobre `primary` |
-| `primaryLight` | `#3FD1B5` | Texto, íconos, onda y glow sobre fondo oscuro |
-| `secondary` | `#7C9CC0` | Acentos fríos, ramas del mapa mental |
-| `text` | `#E8EEF4` | Texto principal |
-| `textMuted` | `#9FB1C4` | Texto secundario |
-| `accent` | `#F5A623` | Bookmarks, resaltados, avisos |
-| `recording` | `#FF4D1A` | Botón grabar, pausa, estado activo |
-| `onRecording` | `#0B121B` | Texto/ícono sobre `recording` |
+| Token | Hex | Origen | Uso |
+|---|---|---|---|
+| `background` | `#0E0724` | derivado | Fondo (índigo casi negro) |
+| `surface` | `#1A0F3D` | marca | Tarjetas |
+| `surfaceHigh` | `#251757` | derivado | Tarjetas elevadas, hojas, diálogos |
+| `primary` | `#6A11F2` | marca | Rellenos y bordes |
+| `onPrimary` | `#FFFFFF` | — | Texto sobre `primary` |
+| `primaryLight` | `#A78BFA` | derivado | Texto, íconos y glow sobre fondo oscuro |
+| `secondary` | `#8B5CF6` | marca | Gráficos, ramas del mapa mental (no texto pequeño) |
+| `recording` | `#EC4899` | marca | Botón grabar, pausa, estado activo |
+| `onRecording` | `#0E0724` | derivado | Texto/ícono sobre `recording` |
+| `text` | `#E9D5FF` | marca | Texto principal |
+| `textMuted` | `#B4A5D6` | derivado | Texto secundario |
+| `accent` | `#F5A623` | funcional | Bookmarks, resaltados, avisos (sin equivalente cálido en la marca) |
+
+Degradado de marca para onda de audio y glow: `#1A0F3D` → `#6A11F2` → `#EC4899`.
 
 ## Contraste
 
-| Combinación | Ratio | AA |
+| Combinación | Ratio | AA texto |
 |---|---|---|
-| `text` / `background` | 16.1 | sí |
-| `text` / `surface` | 12.4 | sí |
-| `textMuted` / `surface` | 6.6 | sí |
-| `primaryLight` / `surface` | 7.6 | sí |
-| `accent` / `surface` | 7.2 | sí |
-| `secondary` / `surface` | 5.1 | sí |
-| `onPrimary` / `primary` | 6.4 | sí |
-| `onRecording` / `recording` | 5.7 | sí |
-| `recording` / `background` | 5.7 | sí |
-| `primary` / `surface` | 2.3 | no: solo relleno, nunca texto |
-| `recording` / `surface` | 4.4 | solo íconos y relleno, no texto |
-| blanco / `recording` | 3.3 | no: por eso `onRecording` es oscuro |
+| `text` / `background` | 14.4 | sí |
+| `text` / `surface` | 13.1 | sí |
+| `text` / `surfaceHigh` | 11.5 | sí |
+| `textMuted` / `surface` | 7.9 | sí |
+| `primaryLight` / `surface` | 6.5 | sí |
+| `primaryLight` / `surfaceHigh` | 5.8 | sí |
+| `onPrimary` / `primary` | 7.1 | sí |
+| `recording` / `surface` | 5.1 | sí |
+| `onRecording` / `recording` | 5.5 | sí |
+| `accent` / `surface` | 8.8 | sí |
+| `secondary` / `surface` | 4.2 | solo gráficos e íconos |
+| `primary` / `surface` | 2.5 | no: solo relleno |
+| blanco / `recording` | 3.5 | no: por eso `onRecording` es oscuro |
