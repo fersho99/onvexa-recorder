@@ -26,7 +26,8 @@ enum class RecordButtonKind { Record, Pause, Resume, Stop }
 
 /**
  * Botón circular grande para el reloj y el celular.
- * Record/Pause/Resume van rellenos en el color de grabación; Stop va con contorno.
+ * Pause/Resume van rellenos en el color de grabación; Record es un punto relleno dentro de un
+ * anillo; Stop va con contorno.
  * El ícono se dibuja con Canvas para no depender de librerías de íconos.
  *
  * @param description texto para accesibilidad (TalkBack), ya traducido.
@@ -39,22 +40,27 @@ fun RecordButton(
     modifier: Modifier = Modifier,
     size: Dp = 64.dp,
 ) {
-    val filled = kind != RecordButtonKind.Stop
+    val ring = kind == RecordButtonKind.Record
+    val filled = kind != RecordButtonKind.Stop && !ring
     val iconColor = if (filled) OnvexaPalette.OnRecording else OnvexaPalette.Recording
     val base = modifier
         .size(size)
         // El brillo va antes del clip para que no se recorte.
-        .let { if (filled) it.glow(OnvexaPalette.Recording, radius = 14.dp, cornerRadius = size / 2) else it }
+        .let { if (filled || ring) it.glow(OnvexaPalette.Recording, radius = 14.dp, cornerRadius = size / 2) else it }
         .clip(CircleShape)
         .let {
             if (filled) it.background(OnvexaPalette.Recording, CircleShape)
-            else it.border(2.dp, OnvexaPalette.Recording, CircleShape)
+            else it.border(if (ring) 3.dp else 2.dp, OnvexaPalette.Recording, CircleShape)
         }
         .semantics { contentDescription = description }
         .clickable(role = Role.Button, onClick = onClick)
 
     Box(modifier = base, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.size(size * 0.42f)) { drawIcon(kind, iconColor) }
+        if (ring) {
+            Box(Modifier.size(size * 0.64f).background(OnvexaPalette.Recording, CircleShape))
+        } else {
+            Canvas(modifier = Modifier.size(size * 0.42f)) { drawIcon(kind, iconColor) }
+        }
     }
 }
 
