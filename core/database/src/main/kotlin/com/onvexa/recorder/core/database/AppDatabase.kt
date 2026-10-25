@@ -49,8 +49,9 @@ import com.onvexa.recorder.core.database.entity.VocabularyTermEntity
         NoteEntity::class,
         ChatMessageEntity::class,
         VocabularyTermEntity::class,
+        com.onvexa.recorder.core.database.entity.SyncMetadataEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

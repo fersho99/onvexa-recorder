@@ -20,6 +20,7 @@ rootProject.name = "onvexa_recorder"
 include(":core:database")
 include(":core:design")
 include(":core:model")
+include(":core:audio")
 include(":app")
 include(":wear")
 

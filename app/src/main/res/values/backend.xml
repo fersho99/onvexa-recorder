@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_test">Probar conexión con Gemini</string>
+    <string name="ai_test_consent">Se enviará a Gemini un ejemplo ficticio de una junta escolar para comprobar la conexión. No se subirá tu biblioteca. La prueba utiliza una solicitud de tu cuota de IA.</string>
+    <string name="ai_test_success">Gemini respondió correctamente. Resumen del ejemplo:</string>
+    <string name="ai_provider_limit">Se alcanzó el límite de Gemini. Inténtalo de nuevo más tarde.</string>
+    <string name="ai_provider_setup">Revisa la clave de Gemini y el modelo configurados en el servidor.</string>
+    <string name="account_upgrade_required">Falta aplicar la actualización del backend en Supabase antes de sincronizar.</string>
+    <string name="ai_title">Procesar con IA</string>
+    <string name="ai_consent">Se enviará el contexto de tus conversaciones al proveedor de IA a través del servidor para generar esta respuesta. Esto requiere internet y consume tu cuota de IA.</string>
+    <string name="ai_continue">Continuar</string>
+    <string name="ai_send">Enviar</string>
+    <string name="ai_summary">Generar resumen</string>
+    <string name="ai_map">Generar mapa</string>
+    <string name="ai_sign_in">Inicia sesión desde Ajustes para usar la IA.</string>
+    <string name="ai_enable_sync">Activa primero la sincronización de tu biblioteca desde Ajustes.</string>
+    <string name="ai_demo_local">Los ejemplos de demostración se conservan solo en este dispositivo.</string>
+    <string name="ai_quota">Alcanzaste la cuota diaria de IA. Inténtalo mañana.</string>
+    <string name="ai_error">No se pudo obtener la respuesta. Comprueba la conexión y la configuración de IA del servidor.</string>
+    <string name="account_not_configured">La conexión con la nube aún no está configurada.</string>
+    <string name="account_email">Correo electrónico</string>
+    <string name="account_password">Contraseña</string>
+    <string name="account_sign_in">Entrar</string>
+    <string name="account_sign_up">Crear cuenta</string>
+    <string name="account_sign_out">Cerrar sesión</string>
+    <string name="account_sync">Sincronizar biblioteca</string>
+    <string name="account_syncing">Sincronizando…</string>
+    <string name="account_sync_consent">Se enviarán las grabaciones, transcripciones, imágenes y notas de esta biblioteca a tu cuenta privada de Supabase. La sincronización continuará en segundo plano según tus ajustes de red. Los datos de demostración no se suben. Confirma que tienes permiso para almacenar estas conversaciones.</string>
+    <string name="account_sync_accept">Aceptar y sincronizar</string>
+    <string name="account_sync_scheduled">Sincronización programada; se ejecutará cuando la red cumpla tus ajustes.</string>
+    <string name="account_confirm_email">Confirma tu correo desde el mensaje recibido y después inicia sesión.</string>
+    <string name="account_signed_in">Sesión iniciada. Puedes activar la sincronización de tu biblioteca.</string>
+    <string name="account_invalid_credentials">Correo o contraseña incorrectos.</string>
+    <string name="account_other_owner">Esta biblioteca pertenece a otra cuenta. Exporta tus datos, borra la biblioteca local desde Privacidad y vuelve a entrar.</string>
+    <string name="account_session_expired">Vuelve a iniciar sesión para continuar.</string>
+    <string name="account_connection_error">No se pudo completar la operación. Revisa tu conexión y que el servidor esté configurado.</string>
+    <string name="account_last_sync">Última sincronización: %1$s</string>
+    <string name="account_delete">Eliminar cuenta y datos en la nube</string>
+    <string name="account_delete_confirm">Esto eliminará permanentemente tu cuenta, las grabaciones y los archivos en la nube. También vaciará la biblioteca de este teléfono. Exporta primero lo que quieras conservar.</string>
+    <string name="account_deleted">Cuenta eliminada.</string>
+    <string name="account_local_deleted">Biblioteca local vaciada y sesión cerrada. Los datos en la nube se conservan.</string>
+    <string name="account_export">Exportar biblioteca</string>
+    <string name="account_export_done">Exportación guardada. Incluye los datos y los archivos que existen en este teléfono.</string>
+</resources>

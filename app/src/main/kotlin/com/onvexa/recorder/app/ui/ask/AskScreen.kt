@@ -24,7 +24,14 @@ import com.onvexa.recorder.app.R
 import com.onvexa.recorder.app.data.ChatMessageView
 import com.onvexa.recorder.app.data.RecordingsRepository
 import com.onvexa.recorder.app.ui.common.ChatMessages
-import com.onvexa.recorder.app.ui.common.DisabledChatInput
+import com.onvexa.recorder.app.ui.common.AiChatInput
+import com.onvexa.recorder.app.ui.common.AiFeedback
+import com.onvexa.recorder.app.backend.AiRepository
+import com.onvexa.recorder.app.backend.BackendException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import com.onvexa.recorder.app.ui.common.EmptyState
 import com.onvexa.recorder.core.design.OnvexaPalette
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +41,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class AskViewModel @Inject constructor(repository: RecordingsRepository) : ViewModel() {
+class AskViewModel @Inject constructor(repository: RecordingsRepository, private val ai: AiRepository) : ViewModel() {
+    private val _busy = MutableStateFlow(false)
+    val busy = _busy.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+    fun ask(question: String) = viewModelScope.launch {
+        if (_busy.value) return@launch
+        _busy.value = true; _error.value = null
+        try { ai.ask(null, question) }
+        catch (e: CancellationException) { throw e }
+        catch (e: Exception) { _error.value = (e as? BackendException)?.code ?: "connection_failed" }
+        finally { _busy.value = false }
+    }
     val messages: StateFlow<List<ChatMessageView>> = repository.globalChat()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }
@@ -42,6 +61,8 @@ class AskViewModel @Inject constructor(repository: RecordingsRepository) : ViewM
 @Composable
 fun AskScreen(viewModel: AskViewModel = hiltViewModel()) {
     val messages by viewModel.messages.collectAsStateWithLifecycle()
+    val busy by viewModel.busy.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
         Text(
@@ -61,6 +82,7 @@ fun AskScreen(viewModel: AskViewModel = hiltViewModel()) {
         } else {
             ChatMessages(messages, Modifier.weight(1f).fillMaxWidth())
         }
-        DisabledChatInput()
+        AiFeedback(busy, error)
+        AiChatInput(busy, viewModel::ask)
     }
 }

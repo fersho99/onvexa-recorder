@@ -1,8 +1,17 @@
 *.iml
 .gradle/
+.kotlin/
 build/
 local.properties
 .idea/
 *.keystore
 .env
+.env.*
+!.env.example
 supabase/.temp/
+node_modules/
+supabase/functions/.env*
+!supabase/functions/.env.example
+*-verification.log
+*.dump
+*.sql.gz

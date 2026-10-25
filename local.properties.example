@@ -1,0 +1,4 @@
+# Copiar a local.properties (ignorado por Git); adaptar sdk.dir a tu equipo.
+sdk.dir=C:/Users/USUARIO/AppData/Local/Android/Sdk
+SUPABASE_URL=https://TU-PROYECTO.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_REEMPLAZAR

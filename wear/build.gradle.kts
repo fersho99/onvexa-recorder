@@ -41,6 +41,10 @@ dependencies {
     implementation(project(":core:design"))
     implementation(project(":core:database"))
     implementation(project(":core:model"))
+    implementation(project(":core:audio"))
+    implementation("com.google.android.gms:play-services-wearable:20.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)

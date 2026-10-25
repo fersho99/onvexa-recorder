@@ -1,0 +1,15 @@
+project_id = "onvexa-recorder"
+
+# Cada handler valida el JWT contra Auth. Compatible con claves publishable y JWT asimetricos.
+[functions.ai]
+verify_jwt = false
+entrypoint = "./functions/ai/serve.ts"
+
+[functions.delete-account]
+verify_jwt = false
+entrypoint = "./functions/delete-account/serve.ts"
+
+# Autenticacion administrativa propia: service_role o token aleatorio privado del cron.
+[functions.maintenance]
+verify_jwt = false
+entrypoint = "./functions/maintenance/serve.ts"

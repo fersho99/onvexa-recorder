@@ -11,6 +11,7 @@ data class RecorderState(
     val levels: List<Float> = emptyList(),
     val highlights: Int = 0,
     val lastHighlightMs: Long? = null,
+    val error: String? = null,
 )
 
 /**

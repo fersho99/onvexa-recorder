@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import com.onvexa.recorder.core.database.entity.ActionItemEntity
 import com.onvexa.recorder.core.database.entity.ActionItemRow
 import com.onvexa.recorder.core.database.entity.AttachmentEntity
@@ -22,10 +23,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookmarkDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(bookmark: BookmarkEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertAll(bookmarks: List<BookmarkEntity>)
 
     @Query("SELECT * FROM bookmarks WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY positionMs")
@@ -37,13 +38,13 @@ interface BookmarkDao {
 
 @Dao
 interface SummaryDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertSummary(summary: SummaryEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertActionItems(items: List<ActionItemEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertMindMap(mindMap: MindMapEntity)
 
     @Query(
@@ -99,7 +100,7 @@ interface SummaryDao {
 
 @Dao
 interface AttachmentDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(attachment: AttachmentEntity)
 
     @Query("SELECT * FROM attachments WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY positionMs")
@@ -111,20 +112,20 @@ interface AttachmentDao {
 
 @Dao
 interface OrganizationDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertFolder(folder: FolderEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertTag(tag: TagEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertTemplates(templates: List<TemplateEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun addTag(ref: RecordingTagCrossRef)
 
-    @Query("DELETE FROM recording_tags WHERE recordingId = :recordingId AND tagId = :tagId")
-    suspend fun removeTag(recordingId: String, tagId: String)
+    @Query("UPDATE recording_tags SET deletedAt = :now, updatedAt = :now, syncState = 2 WHERE recordingId = :recordingId AND tagId = :tagId")
+    suspend fun removeTag(recordingId: String, tagId: String, now: Long = System.currentTimeMillis())
 
     @Query("DELETE FROM folders WHERE id LIKE :prefix || '%'")
     suspend fun deleteFoldersByIdPrefix(prefix: String)
@@ -142,7 +143,7 @@ interface OrganizationDao {
         """
         SELECT t.* FROM tags t
         JOIN recording_tags rt ON rt.tagId = t.id
-        WHERE rt.recordingId = :recordingId AND t.deletedAt IS NULL
+        WHERE rt.recordingId = :recordingId AND rt.deletedAt IS NULL AND t.deletedAt IS NULL
         ORDER BY t.name
         """
     )
@@ -157,7 +158,7 @@ interface OrganizationDao {
 
 @Dao
 interface JobDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(job: ProcessingJobEntity)
 
     @Query("SELECT * FROM processing_jobs WHERE recordingId = :recordingId ORDER BY createdAt")
@@ -185,10 +186,10 @@ interface JobDao {
 
 @Dao
 interface NoteDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(note: NoteEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertAll(notes: List<NoteEntity>)
 
     @Query("SELECT * FROM notes WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY positionMs")
@@ -197,10 +198,10 @@ interface NoteDao {
 
 @Dao
 interface ChatDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(message: ChatMessageEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertAll(messages: List<ChatMessageEntity>)
 
     @Query("SELECT * FROM chat_messages WHERE recordingId = :recordingId AND deletedAt IS NULL ORDER BY createdAt")
@@ -212,7 +213,7 @@ interface ChatDao {
 
 @Dao
 interface VocabularyDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(term: VocabularyTermEntity)
 
     @Query("SELECT * FROM vocabulary_terms WHERE deletedAt IS NULL ORDER BY term")

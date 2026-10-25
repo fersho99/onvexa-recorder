@@ -3,6 +3,8 @@ package com.onvexa.recorder.app.ui.detail
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -78,7 +80,9 @@ import com.onvexa.recorder.app.data.RecordingDetail
 import com.onvexa.recorder.app.player.PlaybackState
 import com.onvexa.recorder.app.ui.common.BulletList
 import com.onvexa.recorder.app.ui.common.ChatMessages
-import com.onvexa.recorder.app.ui.common.DisabledChatInput
+import com.onvexa.recorder.app.ui.common.AiChatInput
+import com.onvexa.recorder.app.ui.common.AiFeedback
+import com.onvexa.recorder.app.ui.common.AiConsent
 import com.onvexa.recorder.app.ui.common.EmptyState
 import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.app.ui.common.SectionCard
@@ -138,6 +142,13 @@ private fun ColumnScope.DetailContent(
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var renaming by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
+    val aiBusy by viewModel.aiBusy.collectAsStateWithLifecycle()
+    val aiError by viewModel.aiError.collectAsStateWithLifecycle()
+    val jobs by viewModel.jobs.collectAsStateWithLifecycle()
+    var aiTask by remember { mutableStateOf<String?>(null) }
+    val draft by viewModel.draft.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val imagePicker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.GetContent()) { uri -> if (uri != null) viewModel.addImage(uri) }
 
     TopBar(
         title = displayTitle(detail.recording.title),
@@ -147,6 +158,31 @@ private fun ColumnScope.DetailContent(
     )
     MetaRow(detail)
     PlayerBar(detail, playback, viewModel)
+    if (playback.loading) Text("Cargando audio…", color = OnvexaPalette.TextMuted)
+    if (playback.error != null) TextButton(onClick = viewModel::retryPlayback) { Text("No se pudo reproducir. Reintentar") }
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        TextButton(onClick = { aiTask = "summary" }, enabled = !aiBusy) { Text(stringResource(R.string.ai_summary)) }
+        TextButton(onClick = { aiTask = "mind_map" }, enabled = !aiBusy) { Text(stringResource(R.string.ai_map)) }
+        TextButton(onClick = viewModel::transcribe, enabled = !aiBusy && detail.recording.status !in listOf("recording","transcribing")) { Text("Transcribir") }
+        TextButton(onClick = { aiTask = "email" }, enabled = !aiBusy) { Text("Correo") }
+    }
+    AiFeedback(aiBusy, aiError)
+    val transcriptionJob = jobs.firstOrNull { it.stage == "transcription" }
+    if (detail.recording.status == "recorded" && detail.segments.isEmpty()) Text(
+        if (transcriptionJob?.lastError == "speech_models_required") "Descarga el modelo de idioma en Ajustes para transcribir sin conexión."
+        else if (transcriptionJob?.status == "failed") "No se pudo transcribir. Revisa el audio y pulsa Transcribir para reintentar."
+        else "Transcripción en cola. Si activaste procesar al cargar, conecta el teléfono a la corriente.",
+        modifier = Modifier.padding(horizontal = 16.dp),color = OnvexaPalette.TextMuted,style = MaterialTheme.typography.bodySmall)
+    if (aiTask != null) AiConsent(onAccept = {
+        when (aiTask) { "summary" -> viewModel.summarize(); "email" -> viewModel.followupEmail(); else -> viewModel.mindMap() }
+        aiTask = null
+    }, onDismiss = { aiTask = null })
+    if (draft != null) AlertDialog(onDismissRequest = viewModel::dismissDraft,
+        title = { Text("Borrador de seguimiento") }, text = { OutlinedTextField(value = draft.orEmpty(),onValueChange = viewModel::editDraft, modifier = Modifier.height(280.dp)) },
+        confirmButton = { TextButton(onClick = {
+            val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO,android.net.Uri.parse("mailto:")).putExtra(android.content.Intent.EXTRA_TEXT,draft)
+            try { context.startActivity(intent) } catch (_: android.content.ActivityNotFoundException) { android.widget.Toast.makeText(context,"Instala una app de correo para continuar",android.widget.Toast.LENGTH_SHORT).show() }
+        }) { Text("Abrir correo") } }, dismissButton = { TextButton(onClick = viewModel::dismissDraft) { Text("Cerrar") } })
 
     ScrollableTabRow(
         selectedTabIndex = tab,
@@ -179,8 +215,15 @@ private fun ColumnScope.DetailContent(
             1 -> TranscriptTab(detail, playback.positionMs, viewModel)
             2 -> MindMapTab(detail)
             3 -> TasksTab(detail, viewModel)
-            4 -> ImagesTab(detail, viewModel::seekTo)
-            else -> AskTab(detail, viewModel::seekTo)
+            4 -> Column {
+                com.onvexa.recorder.app.ui.common.PhotoCaptureButton(onImage = viewModel::addImage)
+                TextButton(onClick = { imagePicker.launch("image/*") }) { Text("Adjuntar foto en ${formatClock(playback.positionMs)}") }
+                ImagesTab(detail, viewModel::seekTo, viewModel)
+            }
+            else -> Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) { AskTab(detail, viewModel::seekTo) }
+                AiChatInput(aiBusy, viewModel::ask)
+            }
         }
     }
 
@@ -634,7 +677,7 @@ private fun TasksTab(detail: RecordingDetail, viewModel: DetailViewModel) {
 // ---------------------------------------------------------------- Imágenes
 
 @Composable
-private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
+private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit, viewModel: DetailViewModel) {
     if (detail.attachments.isEmpty()) {
         EmptyState(
             icon = Icons.Default.Image,
@@ -661,7 +704,7 @@ private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
                         modifier = Modifier.size(72.dp).background(OnvexaPalette.SurfaceHigh, RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Default.Image, null, tint = OnvexaPalette.TextMuted)
+                          AttachmentImage(attachment.id, viewModel)
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
@@ -674,6 +717,9 @@ private fun ImagesTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (attachment.description == null) OnvexaPalette.TextMuted else OnvexaPalette.Text,
                         )
+                          var consent by remember { mutableStateOf(false) }
+                          TextButton(onClick = { consent = true }) { Text("Describir con IA") }
+                          if (consent) AiConsent(onAccept = { consent = false; viewModel.describeImage(attachment.id) }, onDismiss = { consent = false })
                     }
                 }
             }
@@ -697,7 +743,6 @@ private fun AskTab(detail: RecordingDetail, onSeek: (Long) -> Unit) {
         } else {
             ChatMessages(detail.chat, Modifier.weight(1f).fillMaxWidth(), onCitation = onSeek)
         }
-        DisabledChatInput()
     }
 }
 

@@ -1,11 +1,19 @@
 # onvexa_recorder
 
+## Backend Supabase
+
+La implementacion y los pasos de activacion estan en [docs/backend-implementation.md](docs/backend-implementation.md).
+Copiar `local.properties.example` a `local.properties` y completar la URL y la clave publica.
+Para compilar esta rama usar JDK 17 y Android SDK 35. Las claves administrativas y de IA van solo en el servidor.
+
 Grabadora con IA para Galaxy Watch 8 (Wear OS) y Android. Graba conversaciones desde el reloj o el celular, transcribe en el dispositivo y genera resumen, puntos de acción y mapa mental.
 
 ## Estado
 
-Fase 0 completa: base del proyecto, datos, diseño y esqueletos de ambas apps.
-Siguiente: Fase 1 (grabación en el reloj, sincronización, transcripción y resumen).
+Grabacion y reproduccion reales, transcripcion local gratuita con Vosk, transferencia Wear OS,
+sincronizacion Supabase y cinco tareas de IA con Gemini implementadas. Consulta
+[implementacion y prueba en dispositivos](docs/device-implementation.md) y
+[estado del backend](docs/backend-implementation.md).
 
 ## Requisitos
 
@@ -34,6 +42,7 @@ requisito de la Wearable Data Layer. En desarrollo basta con la llave debug de t
 | `:wear` | App del reloj (Wear Compose, Hilt), funciona de forma autónoma |
 | `:core:design` | Tokens Nebula, temas M3 y Wear, componentes base |
 | `:core:database` | Room (entidades, DAOs, búsqueda FTS4) y módulo Hilt |
+| `:core:audio` | Microfono foreground, decodificacion PCM y transferencia Wear OS |
 | `supabase/migrations` | Esquema SQL, RLS y Storage |
 | `docs` | Diagrama ER, paleta de colores y logo de marca (`docs/brand`) |
 

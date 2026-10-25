@@ -1,0 +1,8 @@
+<resources>
+    <string name="capture_notice">Notify participants before recording. Audio stays on this device until you enable sync.</string>
+    <string name="capture_error">Could not record. Check microphone permission and available storage.</string>
+    <string name="capture_saving">Saving audio…</string>
+    <string name="capture_consent_title">Before recording</string>
+    <string name="capture_consent">Confirm that participants were informed. Transcription runs locally; AI features require your permission to send content.</string>
+    <string name="capture_accept">Accept and continue</string>
+</resources>

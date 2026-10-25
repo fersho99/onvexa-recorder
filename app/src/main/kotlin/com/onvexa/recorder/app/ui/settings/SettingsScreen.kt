@@ -36,14 +36,23 @@ import com.onvexa.recorder.app.R
 import com.onvexa.recorder.app.ui.common.OnvexaChip
 import com.onvexa.recorder.core.design.OnvexaPalette
 import java.util.Locale
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val templates by viewModel.templates.collectAsStateWithLifecycle()
+    val models by viewModel.modelStatus.collectAsStateWithLifecycle()
+    val link by viewModel.transferStatus.collectAsStateWithLifecycle()
+    val vocabulary by viewModel.vocabulary.collectAsStateWithLifecycle()
+    var term by remember { mutableStateOf("") }
     var showLegal by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val english = Locale.getDefault().language == "en"
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        if (uri != null) viewModel.export(uri)
+    }
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -55,19 +64,17 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         )
 
         Section(stringResource(R.string.settings_account)) {
-            Text(
-                stringResource(R.string.settings_account_pending),
-                style = MaterialTheme.typography.bodyMedium,
-                color = OnvexaPalette.TextMuted,
-            )
+            AccountSettings(viewModel)
         }
 
         Section(stringResource(R.string.settings_watch)) {
             Text(
-                stringResource(R.string.settings_watch_pending),
+                if (link.connectedNodes > 0) "Dispositivos conectados: ${link.connectedNodes}" else "Sin reloj conectado. Instala ambas apps y empareja el reloj con este teléfono.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = OnvexaPalette.TextMuted,
             )
+            OutlinedButton(onClick = viewModel::syncWatch, enabled = !link.busy) { Text("Sincronizar reloj") }
+            if (link.error != null) Text("No se pudo transferir. Se reintentará al reconectar.", color = OnvexaPalette.Error)
         }
 
         Section(stringResource(R.string.settings_language)) {
@@ -106,6 +113,16 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         Section(stringResource(R.string.settings_processing)) {
+            Text("Transcripción gratuita sin conexión. Descarga una vez el modelo de idioma y el de hablantes por Wi-Fi (aprox. 55–65 MB).", color = OnvexaPalette.TextMuted)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("es" to "Español", "en" to "English").forEach { (code,label) ->
+                    OutlinedButton(onClick = { viewModel.downloadModel(code) }, enabled = !models.downloading && code !in models.ready) { Text(if (code in models.ready) "$label ✓" else label) }
+                }
+            }
+            if (models.downloading) Text("Descargando: ${models.bytes / 1_048_576} MB", color = OnvexaPalette.TextMuted)
+            if (models.error != null) Text("Falló la descarga. Puedes volver a intentarlo.", color = OnvexaPalette.Error)
+            ToggleRow("Generar resumen y mapa con IA al transcribir", settings.autoAi, viewModel::setAutomaticAi)
+            Text("Al activarlo autorizas enviar la transcripción a Gemini desde tu cuenta. Requiere sesión y sincronización habilitada; puede consumir la cuota gratuita del proveedor.", color = OnvexaPalette.TextMuted)
             ToggleRow(
                 label = stringResource(R.string.settings_wifi_only),
                 checked = settings.syncWifiOnly,
@@ -118,7 +135,21 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             )
         }
 
+        Section("Vocabulario personal") {
+            androidx.compose.material3.OutlinedTextField(value = term, onValueChange = { term = it }, label = { Text("Nombre o término frecuente") }, modifier = Modifier.fillMaxWidth())
+            TextButton(onClick = { viewModel.addTerm(term); term = "" }, enabled = term.isNotBlank()) { Text("Añadir") }
+            vocabulary.forEach { entry ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(entry.term, modifier = Modifier.weight(1f), color = OnvexaPalette.Text)
+                    TextButton(onClick = { viewModel.deleteTerm(entry.id) }) { Text("Quitar") }
+                }
+            }
+        }
+
         Section(stringResource(R.string.settings_privacy)) {
+            OutlinedButton(onClick = { exportLauncher.launch("onvexa-export.zip") }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.account_export))
+            }
             OutlinedButton(onClick = { showLegal = true }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.settings_legal))
             }

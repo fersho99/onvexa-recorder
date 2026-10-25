@@ -1,0 +1,8 @@
+<resources>
+    <string name="capture_notice">Avisa a los participantes antes de grabar. El audio permanece en este dispositivo hasta que actives la sincronización.</string>
+    <string name="capture_error">No se pudo grabar. Revisa el permiso del micrófono y el espacio disponible.</string>
+    <string name="capture_saving">Guardando audio…</string>
+    <string name="capture_consent_title">Antes de grabar</string>
+    <string name="capture_consent">Confirma que informaste a los participantes. La transcripción se procesa localmente; las funciones de IA requieren tu autorización para enviar contenido.</string>
+    <string name="capture_accept">Aceptar y continuar</string>
+</resources>

@@ -130,7 +130,14 @@ data class RecordingTagCrossRef(
     val recordingId: String,
     val tagId: String,
     val syncState: Int = SyncState.PENDING_UPSERT,
+    @ColumnInfo(defaultValue = "0") val createdAt: Long = 0,
+    @ColumnInfo(defaultValue = "0") val updatedAt: Long = 0,
+    val deletedAt: Long? = null,
 )
+
+/** Cursores y versiones del servidor; se confirman en la misma transaccion que las filas. */
+@Entity(tableName = "sync_metadata")
+data class SyncMetadataEntity(@PrimaryKey val key: String, val value: String)
 
 @Entity(
     tableName = "bookmarks",

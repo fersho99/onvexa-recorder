@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import androidx.room.withTransaction
 
 @Singleton
 class RecordingsRepository @Inject constructor(
@@ -105,7 +106,13 @@ class RecordingsRepository @Inject constructor(
 
     suspend fun rename(id: String, title: String) = recordingDao.rename(id, title.trim(), now())
 
-    suspend fun deleteRecording(id: String) = recordingDao.softDelete(id, now())
+    suspend fun deleteRecording(id: String) = withContext(Dispatchers.IO) { database.withTransaction {
+        val timestamp = now()
+        recordingDao.softDelete(id,timestamp)
+        for (table in listOf("recording_tags","bookmarks","speakers","transcript_segments","summaries","action_items","mind_maps","attachments","notes","chat_messages")) {
+            database.openHelper.writableDatabase.execSQL("UPDATE $table SET deletedAt=?,updatedAt=?,syncState=2 WHERE recordingId=? AND deletedAt IS NULL",arrayOf(timestamp,timestamp,id))
+        }
+    } }
 
     suspend fun setActionDone(id: String, done: Boolean) =
         summaryDao.setActionStatus(id, if (done) "done" else "open", now())

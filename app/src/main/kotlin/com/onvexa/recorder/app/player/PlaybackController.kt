@@ -8,6 +8,8 @@ data class PlaybackState(
     val positionMs: Long = 0,
     val durationMs: Long = 0,
     val speed: Float = 1f,
+    val loading: Boolean = false,
+    val error: String? = null,
 )
 
 /** Reproductor de la grabación abierta. La implementación con audio real llega con la grabación. */

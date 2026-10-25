@@ -61,7 +61,7 @@ interface RecordingDao {
         """
         SELECT r.* FROM recordings r
         JOIN recording_tags rt ON rt.recordingId = r.id
-        WHERE rt.tagId = :tagId AND r.deletedAt IS NULL
+        WHERE rt.tagId = :tagId AND rt.deletedAt IS NULL AND r.deletedAt IS NULL
         ORDER BY r.startedAt DESC
         """
     )
@@ -77,7 +77,7 @@ interface RecordingDao {
                  ORDER BY s.createdAt DESC LIMIT 1) AS summaryPreview,
                (SELECT group_concat(t.name, '|') FROM recording_tags rt
                   JOIN tags t ON t.id = rt.tagId
-                 WHERE rt.recordingId = r.id AND t.deletedAt IS NULL) AS tagsCsv
+                 WHERE rt.recordingId = r.id AND rt.deletedAt IS NULL AND t.deletedAt IS NULL) AS tagsCsv
         FROM recordings r
         WHERE r.deletedAt IS NULL
         ORDER BY r.startedAt DESC
@@ -99,6 +99,12 @@ interface RecordingDao {
 
     @Query("SELECT * FROM recordings WHERE syncState != 0 ORDER BY updatedAt")
     suspend fun getPendingSync(): List<RecordingEntity>
+
+    @Query("SELECT * FROM recordings WHERE deletedAt IS NULL AND localAudioPath IS NOT NULL AND status IN ('recorded','transcribing')")
+    suspend fun getPendingProcessing(): List<RecordingEntity>
+
+    @Query("UPDATE recordings SET status='failed', updatedAt=:now, syncState=1 WHERE status='recording'")
+    suspend fun markInterrupted(now: Long)
 
     @Query("UPDATE recordings SET status = :status, updatedAt = :now, syncState = 1 WHERE id = :id")
     suspend fun setStatus(id: String, status: String, now: Long)

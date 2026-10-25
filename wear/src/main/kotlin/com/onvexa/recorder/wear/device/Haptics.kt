@@ -3,6 +3,8 @@ package com.onvexa.recorder.wear.device
 import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import android.os.Vibrator
+import android.os.Build
 import com.onvexa.recorder.wear.settings.WatchSettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -21,7 +23,9 @@ class Haptics @Inject constructor(
     @ApplicationContext context: Context,
     settings: WatchSettingsRepository,
 ) {
-    private val vibrator = context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+    @Suppress("DEPRECATION")
+    private val vibrator = if (Build.VERSION.SDK_INT >= 31) context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        else context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 
     @Volatile
     private var enabled = true

@@ -20,6 +20,7 @@ data class AppSettings(
     val defaultTemplateId: String? = null,
     val syncWifiOnly: Boolean = true,
     val processOnlyWhileCharging: Boolean = false,
+    val autoAi: Boolean = false,
 )
 
 @Singleton
@@ -30,6 +31,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
         val defaultTemplate = stringPreferencesKey("default_template")
         val wifiOnly = booleanPreferencesKey("sync_wifi_only")
         val charging = booleanPreferencesKey("process_only_charging")
+        val autoAi = booleanPreferencesKey("automatic_ai")
     }
 
     val settings: Flow<AppSettings> = context.settingsStore.data.map { p ->
@@ -38,6 +40,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
             defaultTemplateId = p[Keys.defaultTemplate],
             syncWifiOnly = p[Keys.wifiOnly] ?: true,
             processOnlyWhileCharging = p[Keys.charging] ?: false,
+            autoAi = p[Keys.autoAi] ?: false,
         )
     }
 
@@ -45,6 +48,7 @@ class SettingsRepository @Inject constructor(@ApplicationContext private val con
     suspend fun setDefaultTemplate(id: String) = edit { it[Keys.defaultTemplate] = id }
     suspend fun setSyncWifiOnly(value: Boolean) = edit { it[Keys.wifiOnly] = value }
     suspend fun setProcessOnlyWhileCharging(value: Boolean) = edit { it[Keys.charging] = value }
+    suspend fun setAutoAi(value: Boolean) = edit { it[Keys.autoAi] = value }
 
     private suspend fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
         context.settingsStore.edit { block(it) }

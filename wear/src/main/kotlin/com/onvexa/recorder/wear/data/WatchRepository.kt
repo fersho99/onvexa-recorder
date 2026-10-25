@@ -26,6 +26,7 @@ class WatchRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val recordingDao: RecordingDao,
     private val summaryDao: SummaryDao,
+    private val transfer: com.onvexa.recorder.core.audio.WearTransfer,
 ) {
     fun recent(limit: Int = RECENT_LIMIT): Flow<List<LibraryItem>> =
         recordingDao.observeLibraryRows().map { rows -> rows.take(limit).map { it.toLibraryItem() } }
@@ -40,8 +41,10 @@ class WatchRepository @Inject constructor(
         recording?.let { WatchDetail(it, summaries.firstOrNull()?.executive, actions) }
     }
 
-    suspend fun setActionDone(id: String, done: Boolean) =
+    suspend fun setActionDone(id: String, done: Boolean) {
         summaryDao.setActionStatus(id, if (done) "done" else "open", System.currentTimeMillis())
+        transfer.schedule()
+    }
 
     /** Espacio libre en el almacenamiento interno, en bytes. */
     fun freeBytes(): Long = StatFs(context.filesDir.absolutePath).availableBytes

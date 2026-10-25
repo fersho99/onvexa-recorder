@@ -1,0 +1,8 @@
+{
+  "compilerOptions": { "strict": true },
+  "imports": { "@supabase/supabase-js": "npm:@supabase/supabase-js@2.57.4" },
+  "tasks": {
+    "check": "deno check ai/serve.ts delete-account/serve.ts maintenance/serve.ts",
+    "test": "deno test --allow-env tests/"
+  }
+}

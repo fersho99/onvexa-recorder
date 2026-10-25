@@ -46,15 +46,33 @@ import com.onvexa.recorder.core.design.components.RecordButton
 import com.onvexa.recorder.core.design.components.RecordButtonKind
 import com.onvexa.recorder.core.model.formatClock
 import java.util.Locale
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 @Composable
 fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val templates by viewModel.templates.collectAsStateWithLifecycle()
     var noting by remember { mutableStateOf(false) }
+    var consent by remember { mutableStateOf(false) }
+    var permissionDenied by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val mediaError by viewModel.mediaError.collectAsStateWithLifecycle()
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> if (uri != null) viewModel.addImage(uri) }
+    val microphone = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.start() else permissionDenied = true
+    }
     val english = Locale.getDefault().language == "en"
 
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal = 16.dp)) {
+        if (state.started) com.onvexa.recorder.app.ui.common.PhotoCaptureButton(enabled = !state.saving, onImage = viewModel::addImage)
+        if (mediaError != null) Text(mediaError.orEmpty(), color = OnvexaPalette.Error)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onClose) {
                 Icon(Icons.Default.Close, stringResource(R.string.action_close), tint = OnvexaPalette.Text)
@@ -68,12 +86,14 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
             color = OnvexaPalette.SurfaceHigh,
         ) {
             Text(
-                text = stringResource(R.string.record_preview_notice),
+                text = stringResource(R.string.capture_notice),
                 modifier = Modifier.padding(12.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = OnvexaPalette.TextMuted,
             )
         }
+        if (permissionDenied || state.error != null) Text(stringResource(R.string.capture_error), color = OnvexaPalette.Error)
+        if (state.saving) Text(stringResource(R.string.capture_saving), color = OnvexaPalette.TextMuted)
 
         Column(
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -147,19 +167,18 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
                     kind = RecordButtonKind.Stop,
                     description = stringResource(R.string.record_stop),
                     onClick = {
-                        viewModel.stop()
-                        onClose()
+                          if (!state.saving) { viewModel.stop(); onClose() }
                     },
                     size = 56.dp,
                 )
-                IconButton(onClick = {}, enabled = false) {
-                    Icon(Icons.Default.PhotoCamera, stringResource(R.string.record_photo), tint = OnvexaPalette.TextMuted)
+                IconButton(onClick = { imagePicker.launch("image/*") }, enabled = !state.saving) {
+                    Icon(Icons.Default.PhotoCamera, stringResource(R.string.record_photo), tint = OnvexaPalette.Text)
                 }
             } else {
                 RecordButton(
                     kind = RecordButtonKind.Record,
                     description = stringResource(R.string.record_start),
-                    onClick = viewModel::start,
+                    onClick = { consent = true },
                     size = 88.dp,
                 )
             }
@@ -172,9 +191,17 @@ fun RecordScreen(onClose: () -> Unit, viewModel: RecordViewModel = hiltViewModel
             initial = "",
             onDismiss = { noting = false },
             onConfirm = {
-                if (it.isNotBlank()) viewModel.addNote()
+                if (it.isNotBlank()) viewModel.addNote(it)
                 noting = false
             },
         )
     }
+    if (consent) AlertDialog(onDismissRequest = { consent = false },
+        title = { Text(stringResource(R.string.capture_consent_title)) }, text = { Text(stringResource(R.string.capture_consent)) },
+        confirmButton = { TextButton(onClick = {
+            consent = false; permissionDenied = false
+            if (ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) viewModel.start()
+            else microphone.launch(Manifest.permission.RECORD_AUDIO)
+        }) { Text(stringResource(R.string.capture_accept)) } },
+        dismissButton = { TextButton(onClick = { consent = false }) { Text(stringResource(R.string.action_cancel)) } })
 }

@@ -30,6 +30,9 @@ class RecordViewModel @Inject constructor(
     private val _mark = MutableStateFlow<HighlightMark?>(null)
     val mark: StateFlow<HighlightMark?> = _mark.asStateFlow()
     private var markJob: Job? = null
+    private var stopping = false
+    private val mutableError = MutableStateFlow<String?>(null)
+    val error = mutableError.asStateFlow()
 
     /** Empieza a grabar si aún no hay una grabación en curso. */
     fun ensureStarted() {
@@ -58,10 +61,16 @@ class RecordViewModel @Inject constructor(
 
     /** Detiene, guarda y avisa con la duración para mostrar la pantalla de cierre. */
     fun stop(onSaved: (Long) -> Unit) {
+        if (stopping) return
+        stopping = true
         viewModelScope.launch {
-            val duration = recorder.stop()
-            haptics.perform(HapticKind.Success)
-            onSaved(duration)
+            try {
+                val duration = recorder.stop()
+                haptics.perform(HapticKind.Success)
+                onSaved(duration)
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (_: Exception) { mutableError.value = "No se pudo guardar la grabación"; haptics.perform(HapticKind.Warning) }
+            finally { stopping = false }
         }
     }
 

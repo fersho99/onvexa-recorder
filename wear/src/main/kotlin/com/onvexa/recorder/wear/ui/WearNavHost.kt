@@ -72,7 +72,7 @@ fun WearNavHost(startDestination: String, shell: ShellViewModel = hiltViewModel(
             )
         }
         composable(Routes.RECORD) {
-            RecordScreen(onRequestExit = { nav.navigate(Routes.CONFIRM) }, onSaved = goSaved)
+            RecordScreen(onRequestExit = { if (recorder.phase == RecorderPhase.Idle) goHome() else nav.navigate(Routes.CONFIRM) }, onSaved = goSaved)
         }
         composable(Routes.CONFIRM) {
             ConfirmStopScreen(onKeepRecording = { nav.popBackStack() }, onSaved = goSaved)

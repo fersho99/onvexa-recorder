@@ -1,84 +1,44 @@
 package com.onvexa.recorder.app.ui.record
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onvexa.recorder.app.data.RecordingsRepository
-import com.onvexa.recorder.core.database.entity.TemplateEntity
+import com.onvexa.recorder.core.audio.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import kotlin.random.Random
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class RecordUiState(
-    val started: Boolean = false,
-    val paused: Boolean = false,
-    val elapsedMs: Long = 0,
-    val levels: List<Float> = emptyList(),
-    val highlights: Int = 0,
-    val notes: Int = 0,
-    val templateId: String? = null,
+    val started: Boolean = false, val paused: Boolean = false, val elapsedMs: Long = 0,
+    val levels: List<Float> = emptyList(), val highlights: Int = 0, val notes: Int = 0,
+    val templateId: String? = null, val saving: Boolean = false, val error: String? = null,
 )
-
-/**
- * Maqueta de la pantalla de grabación: simula el tiempo y el nivel de audio, sin tocar el micrófono.
- * La grabación real llega en la etapa 2.
- */
 @HiltViewModel
-class RecordViewModel @Inject constructor(repository: RecordingsRepository) : ViewModel() {
-
-    private val _state = MutableStateFlow(RecordUiState())
-    val state: StateFlow<RecordUiState> = _state.asStateFlow()
-
-    val templates: StateFlow<List<TemplateEntity>> = repository.templates()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    private var ticker: Job? = null
-    private var level = 0.3f
-
-    fun start() {
-        _state.update { it.copy(started = true, paused = false) }
-        runTicker()
-    }
-
-    fun togglePause() {
-        val paused = !_state.value.paused
-        _state.update { it.copy(paused = paused) }
-        if (paused) ticker?.cancel() else runTicker()
-    }
-
-    fun stop() {
-        ticker?.cancel()
-        _state.update { RecordUiState(templateId = it.templateId) }
-    }
-
-    fun highlight() = _state.update { it.copy(highlights = it.highlights + 1) }
-    fun addNote() = _state.update { it.copy(notes = it.notes + 1) }
-    fun selectTemplate(id: String) = _state.update { it.copy(templateId = id) }
-
-    private fun runTicker() {
-        ticker?.cancel()
-        ticker = viewModelScope.launch {
-            while (isActive) {
-                delay(TICK_MS)
-                level = (level + (Random.nextFloat() - 0.5f) * 0.5f).coerceIn(0.05f, 1f)
-                _state.update {
-                    it.copy(elapsedMs = it.elapsedMs + TICK_MS, levels = (it.levels + level).takeLast(MAX_LEVELS))
-                }
-            }
+class RecordViewModel @Inject constructor(repository: RecordingsRepository, @ApplicationContext private val context: Context,
+    private val media: com.onvexa.recorder.app.backend.MediaRepository) : ViewModel() {
+    private val mutableError = MutableStateFlow<String?>(null)
+    val mediaError = mutableError.asStateFlow()
+    fun addImage(uri: android.net.Uri) { val capture = CaptureRuntime.state.value; val id = capture.id ?: return
+        viewModelScope.launch { try { media.addImage(id,capture.elapsedMs,uri); mutableError.value = null } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (_: Exception) { mutableError.value = "No se pudo guardar la foto" }
+            finally { if (uri.authority == context.packageName + ".photos") runCatching { context.contentResolver.delete(uri,null,null) } }
         }
     }
-
-    private companion object {
-        const val TICK_MS = 100L
-        const val MAX_LEVELS = 120
-    }
+    private val selectedTemplate = MutableStateFlow<String?>(null)
+    val state = combine(CaptureRuntime.state, selectedTemplate) { capture, template ->
+        RecordUiState(started = capture.phase != CapturePhase.Idle,
+            paused = capture.phase == CapturePhase.Paused, elapsedMs = capture.elapsedMs,
+            levels = capture.levels, highlights = capture.highlights, notes = capture.notes,
+            templateId = template, saving = capture.phase in listOf(CapturePhase.Starting,CapturePhase.Saving), error = capture.error)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), RecordUiState())
+    val templates = repository.templates().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    fun start() = CaptureCommands.start(context,"phone",selectedTemplate.value ?: templates.value.firstOrNull()?.id,
+        if (java.util.Locale.getDefault().language == "en") "en" else "es")
+    fun togglePause() = CaptureCommands.send(context, if (state.value.paused) CaptureCommands.RESUME else CaptureCommands.PAUSE)
+    fun stop() = CaptureCommands.send(context,CaptureCommands.STOP)
+    fun highlight() = CaptureCommands.send(context,CaptureCommands.MARK)
+    fun addNote(text: String) = CaptureCommands.send(context,CaptureCommands.NOTE,text)
+    fun selectTemplate(id: String) { selectedTemplate.value = id }
 }

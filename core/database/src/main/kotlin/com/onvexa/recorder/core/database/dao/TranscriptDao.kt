@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import com.onvexa.recorder.core.database.entity.SpeakerEntity
 import com.onvexa.recorder.core.database.entity.TranscriptSegmentEntity
 import kotlinx.coroutines.flow.Flow
@@ -12,11 +13,26 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TranscriptDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertSegments(segments: List<TranscriptSegmentEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertSpeakers(speakers: List<SpeakerEntity>)
+
+    @Query("SELECT * FROM speakers WHERE recordingId = :recordingId")
+    suspend fun getSpeakers(recordingId: String): List<SpeakerEntity>
+
+    @Query("UPDATE transcript_segments SET deletedAt=:now, updatedAt=:now, syncState=2 WHERE recordingId=:id")
+    suspend fun markSegmentsDeleted(id: String, now: Long)
+
+    @Query("UPDATE speakers SET deletedAt=:now, updatedAt=:now, syncState=2 WHERE recordingId=:id")
+    suspend fun markSpeakersDeleted(id: String, now: Long)
+
+    @Transaction
+    suspend fun commitTranscript(id: String, speakers: List<SpeakerEntity>, segments: List<TranscriptSegmentEntity>, now: Long) {
+        markSegmentsDeleted(id,now); markSpeakersDeleted(id,now)
+        upsertSpeakers(speakers); upsertSegments(segments)
+    }
 
     @Query(
         """

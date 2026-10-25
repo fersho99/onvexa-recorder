@@ -19,6 +19,12 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,14 +55,34 @@ fun RecordScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val mark by viewModel.mark.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val paused = state.phase == RecorderPhase.Paused
 
-    LaunchedEffect(Unit) { viewModel.ensureStarted() }
+    val context = LocalContext.current
+    var consent by remember { mutableStateOf(state.phase == RecorderPhase.Idle) }
+    var denied by remember { mutableStateOf(false) }
+    val microphone = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        denied = !granted
+        if (granted) { consent = false; viewModel.ensureStarted() }
+    }
+    if (consent) {
+        androidx.wear.compose.material.ScalingLazyColumn(Modifier.fillMaxSize()) {
+            item { Text("Avisa a los participantes antes de grabar. El audio se guarda en el reloj y se transfiere a tu teléfono.", textAlign = TextAlign.Center) }
+            if (denied) item { Text("Permite el micrófono en Ajustes.") }
+            item { androidx.wear.compose.material.Chip(onClick = {
+                if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) { consent = false; viewModel.ensureStarted() }
+                else microphone.launch(android.Manifest.permission.RECORD_AUDIO)
+            }, label = { Text("Aceptar y grabar") }) }
+            item { androidx.wear.compose.material.Chip(onClick = onRequestExit, label = { Text("Cancelar") }) }
+        }
+        return
+    }
     // El gesto de volver no sale de la grabación: pide confirmar.
     BackHandler(onBack = onRequestExit)
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colors.background)) {
         TimeText()
+        if (state.error != null || error != null) Text(error ?: "No se pudo grabar. Revisa el permiso y el espacio disponible.", modifier = Modifier.padding(24.dp))
         Column(
             modifier = Modifier.fillMaxSize().padding(top = 30.dp, bottom = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

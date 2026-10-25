@@ -1,8 +1,8 @@
 package com.onvexa.recorder.wear.di
 
-import com.onvexa.recorder.wear.link.FakePhoneLink
+import com.onvexa.recorder.wear.link.WearPhoneLink
 import com.onvexa.recorder.wear.link.PhoneLink
-import com.onvexa.recorder.wear.recorder.FakeRecorderController
+import com.onvexa.recorder.wear.recorder.AndroidRecorderController
 import com.onvexa.recorder.wear.recorder.RecorderController
 import dagger.Binds
 import dagger.Module
@@ -14,8 +14,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class WearModule {
     @Binds @Singleton
-    abstract fun bindRecorder(impl: FakeRecorderController): RecorderController
+    abstract fun bindRecorder(impl: AndroidRecorderController): RecorderController
 
     @Binds @Singleton
-    abstract fun bindPhoneLink(impl: FakePhoneLink): PhoneLink
+    abstract fun bindPhoneLink(impl: WearPhoneLink): PhoneLink
 }

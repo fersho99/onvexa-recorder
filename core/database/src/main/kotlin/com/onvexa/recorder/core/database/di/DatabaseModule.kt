@@ -2,6 +2,8 @@ package com.onvexa.recorder.core.database.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.onvexa.recorder.core.database.AppDatabase
 import com.onvexa.recorder.core.database.dao.AttachmentDao
 import com.onvexa.recorder.core.database.dao.BookmarkDao
@@ -27,7 +29,15 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME).build()
+        Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.NAME)
+            .addMigrations(object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE recording_tags ADD COLUMN createdAt INTEGER NOT NULL DEFAULT 0")
+                    db.execSQL("ALTER TABLE recording_tags ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT 0")
+                    db.execSQL("ALTER TABLE recording_tags ADD COLUMN deletedAt INTEGER")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS sync_metadata (`key` TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY(`key`))")
+                }
+            }).build()
 
     @Provides fun recordingDao(db: AppDatabase): RecordingDao = db.recordingDao()
     @Provides fun transcriptDao(db: AppDatabase): TranscriptDao = db.transcriptDao()
